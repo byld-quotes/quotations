@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Signed in with a confirmed @byld.ae or @kbwrealestate.com email, or one of the extra addresses
+    function staff() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && (request.auth.token.email.lower().matches('.*@(byld[.]ae|kbwrealestate[.]com)$')
+            || request.auth.token.email.lower() in ['lcrllenado@gmail.com']);
+    }
+    // Contracts, completion certificates, settings and permanent deletes
+    function admin() {
+      return staff() && request.auth.token.email.lower() in
+        ['accounts@byld.ae', 'lcrllenado@gmail.com', 'accounts@kbwrealestate.com'];
+    }
+
+    match /quotes/{id} {
+      allow read, create, update: if staff();
+      allow delete: if admin();
+      match /revisions/{rev} {
+        allow read, create: if staff();
+        allow update, delete: if admin();
+      }
+    }
+    match /index/{id} {
+      allow read, create, update: if staff();
+      allow delete: if admin();
+    }
+    match /counters/{id} {
+      allow read, create, update: if staff();
+    }
+    // Contracts and completion certificates: only the three admin addresses
+    match /contracts/{id} {
+      allow read, write: if admin();
+    }
+    // Signature and stamp images: only the three admin addresses
+    match /private/{id} {
+      allow read, write: if admin();
+    }
+    match /settings/{id} {
+      allow read: if staff();
+      allow write: if admin();
+    }
+  }
+}
