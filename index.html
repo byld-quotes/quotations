@@ -341,8 +341,8 @@ table.ctab{min-width:560px}
     <p class="sub">Use your BYLD or KBW work email.</p>
     <div class="alert bad" id="aMsg" hidden></div>
     <div id="aStart">
-      <div class="atabs" role="tablist"><button class="on" id="aTabPw" role="tab">Password</button><button id="aTabLink" role="tab">Email me a link</button></div>
-      <label class="lab" for="aEmail">Work email</label>
+      <div hidden><button id="aTabPw"></button><button id="aTabLink"></button></div>
+      <label class="lab" for="aEmail">Email</label>
       <input class="in" id="aEmail" type="email" autocomplete="email" placeholder="name@byld.ae or name@kbwrealestate.com">
       <div id="aLinkBox" hidden>
         <button class="btn pri wide" id="aSendLink">Send sign-in link</button>
@@ -350,10 +350,10 @@ table.ctab{min-width:560px}
       </div>
       <div id="aPwBox">
         <label class="lab" for="aPw">Password</label>
-        <input class="in" id="aPw" type="password" autocomplete="current-password" placeholder="At least 8 characters">
+        <input class="in" id="aPw" type="password" autocomplete="current-password" placeholder="Password">
         <button class="btn pri wide" id="aSignIn">Sign in</button>
-        <div class="arow"><button class="linkbtn" id="aCreate">Create account</button><button class="linkbtn" id="aForgot">Forgot password</button></div>
-        <p class="fine">First time? Type your email and a new password, then “Create account”. We'll send one email to confirm the address. After that, you sign in here with your email and password only.</p>
+        <div class="arow"><button class="linkbtn" id="aForgot">Forgot password?</button><button class="linkbtn" id="aCreate">Create account</button></div>
+        <p class="fine">New here? Type your work email and choose a password (at least 8 characters), then “Create account”. You'll get one email to confirm it's you. After that, just sign in with your email and password.</p>
       </div>
     </div>
     <div id="aLinkSent" hidden>
@@ -411,7 +411,7 @@ table.ctab{min-width:560px}
   <div class="ebar"><div class="wrap">
     <button class="btn ghost sm" id="btnBack">← Register</button>
     <span class="id" id="eId">New quotation</span>
-    <select id="eStatus" aria-label="Status"><option>Draft</option><option>Sent</option><option>Approved</option><option>Rejected</option><option>Cancelled</option></select>
+    <select id="eStatus" aria-label="Status"><option>Working</option><option>Sent</option><option>Approved</option><option>Rejected</option><option>Cancelled</option></select>
     <input id="ePrep" placeholder="Engineer (not printed)" aria-label="Engineer responsible, shown in the register only" style="border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 8px;width:170px">
     <span class="dirty" id="eDirty" hidden>Unsaved changes</span>
     <span class="sp"></span>
@@ -760,11 +760,11 @@ let undoState = null, busy = false, dupState = {client: [], project: []}, dupTim
 
 const allowedEmail = e => { e = String(e || "").toLowerCase(); return DOMAINS.some(d => e.endsWith("@" + d)) || EXTRA.includes(e); };
 const prefixFor = iso => { const [y, m, d] = (iso || todayISO()).split("-"); return `${d}${m}${y.slice(2)}`; };
-const fixStatus = s => s === "Confirmed" ? "Approved" : (s || "Draft");
+const fixStatus = s => s === "Confirmed" ? "Approved" : (!s || s === "Draft") ? "Working" : s;
 
 function blankQuote() {
   const d = todayISO(), D = defaults;
-  return { number:"", seq:0, rev:0, status:"Draft", date:d, validUntil:addDays(d, num(D.validityDays) || 7), customerId:"",
+  return { number:"", seq:0, rev:0, status:"Working", date:d, validUntil:addDays(d, num(D.validityDays) || 7), customerId:"",
     company: clone(D.company), labels: clone(D.labels),
     client: {name:"",phone:"",email:"",trn:""}, project: {name:"",location:"",street:"",villa:"",phone:""},
     sections: [{title:"", note:"", items:[{desc:"",qty:1,unit:"LSM",rate:0}]}],
@@ -817,6 +817,11 @@ async function firebaseStore() {
     async findIndex(field, value, n = 12) {
       const s = await getDocs(query(collection(fs, "index"), where(field, "==", value), limit(n)));
       return s.docs.map(d => ({id: d.id, ...d.data()}));
+    },
+    async peekNext(date) {
+      const pfx = prefixFor(date);
+      const [a, b] = await Promise.all([getDoc(doc(fs, "counters", "q-" + pfx)), getDoc(doc(fs, "counters", "customers"))]);
+      return {number: `${pfx}-${(a.exists() ? a.data().n || 0 : 0) + 1}`, customerId: "C-" + pad((b.exists() ? b.data().n || 0 : 0) + 1, 4)};
     },
     /* new quotation: claim the next DDMMYY-n number and (if needed) a customer ID in one locked step */
     create(data) {
@@ -891,6 +896,7 @@ function demoStore() {
     watchQuote(id, cb) { const f = () => cb(Q.has(id) ? clone(Q.get(id)) : null); const a = qsubs.get(id) || []; a.push(f); qsubs.set(id, a); setTimeout(f, 10); return () => qsubs.set(id, (qsubs.get(id) || []).filter(x => x !== f)); },
     getQuote: async id => Q.has(id) ? clone(Q.get(id)) : null,
     findIndex: async (field, value) => [...I.entries()].filter(([, d]) => d[field] === value).map(([id, d]) => ({id, ...d})),
+    async peekNext(date) { const pfx = prefixFor(date); let n = (C.get("q-" + pfx) || 0) + 1; while (Q.has(`${pfx}-${n}`)) n++; return {number: `${pfx}-${n}`, customerId: "C-" + pad((C.get("customers") || 0) + 1, 4)}; },
     async create(data) {
       const pfx = prefixFor(data.date); let n = C.get("q-" + pfx) || 0, id;
       do { n++; id = `${pfx}-${n}`; } while (Q.has(id));
@@ -971,7 +977,7 @@ function inFolder(d, f) {
   if (f === "deleted") return !!d.deleted;
   if (d.deleted) return false;
   const st = fixStatus(d.status);
-  return f === "all" || (f === "pending" && (st === "Draft" || st === "Sent")) || (f === "approved" && st === "Approved") || (f === "rejected" && st === "Rejected") || (f === "cancelled" && st === "Cancelled");
+  return f === "all" || (f === "pending" && (st === "Working" || st === "Sent")) || (f === "approved" && st === "Approved") || (f === "rejected" && st === "Rejected") || (f === "cancelled" && st === "Cancelled");
 }
 $("folders").addEventListener("click", e => { const b = e.target.closest("[data-folder]"); if (!b) return; folder = b.dataset.folder; renderList(); });
 
@@ -982,10 +988,22 @@ window.addEventListener("resize", () => { clearTimeout(window.__rs); window.__rs
 if (document.fonts?.ready) document.fonts.ready.then(sizeAll);
 const inp = (path, val, ph = "", extra = "") => `<input class="ed ${extra}" data-g="${path}" value="${esc(val)}" placeholder="${esc(ph)}" aria-label="${esc(ph || path)}">`;
 
+let nextNo = "", nextCust = "", nextReq = 0;
+/* shows the number this new quotation will get; the real number is still claimed safely when it's saved */
+async function refreshNext() {
+  if (curId || !cur || !store.peekNext) return;
+  const my = ++nextReq;
+  try { const r = await store.peekNext(cur.date); if (my !== nextReq || curId) return;
+    nextNo = r.number; nextCust = r.customerId;
+    const c = $("qNoCell"); if (c) c.innerHTML = `<span class="ro" title="Reserved for this quotation when you save">${esc(nextNo)}</span>`;
+    $("eId").textContent = nextNo;
+    const k = $("custIdCell"); if (k && !cur.customerId && !existingCustomerId()) k.innerHTML = `<span class="ro">${esc(nextCust)}</span>`;
+  } catch {}
+}
 function renderEditor() {
   const q = cur, C = q.company, L = q.labels;
-  $("eId").textContent = q.number ? label(q) : "New quotation";
-  $("eStatus").value = q.status; $("ePrep").value = q.preparedBy || "";
+  $("eId").textContent = q.number ? label(q) : (nextNo || "New quotation");
+  $("eStatus").value = fixStatus(q.status); $("ePrep").value = q.preparedBy || "";
   $("btnDup").hidden = !curId; $("btnRev").hidden = !curId;
   const del = !!q.deleted, st = fixStatus(q.status);
   $("btnApprove").hidden = !curId || del || st === "Approved"; $("btnReject").hidden = !curId || del || st === "Rejected";
@@ -1028,7 +1046,7 @@ function renderEditor() {
       </div></div>
     <div class="meta">
       <div class="k">DATE</div><div class="v"><input class="ed" type="date" data-g="date" value="${esc(q.date)}" aria-label="Date"></div>
-      <div class="k">QUOTE NO.</div><div class="v">${q.number ? `<span class="ro">${esc(label(q))}</span>` : `<span class="pend">assigned on save</span>`}</div>
+      <div class="k">QUOTE NO.</div><div class="v" id="qNoCell">${q.number ? `<span class="ro">${esc(label(q))}</span>` : nextNo ? `<span class="ro" title="Reserved for this quotation when you save">${esc(nextNo)}</span>` : `<span class="pend">…</span>`}</div>
       <div class="k">CUSTOMER ID</div><div class="v" id="custIdCell"></div>
       <div class="k">VALID UNTIL</div><div class="v"><input class="ed" type="date" data-g="validUntil" value="${esc(q.validUntil)}" aria-label="Valid until"></div>
     </div>
@@ -1116,7 +1134,7 @@ function refreshTotals(keepFocusId) {
   ps.classList.toggle("badsum", T.paySum !== 100);
   const cell = $("custIdCell");
   if (cell) { const ex = q.customerId || existingCustomerId(q.client.name);
-    cell.innerHTML = ex ? `<span class="ro">${esc(ex)}</span>` : `<span class="pend">assigned on save</span>`; }
+    const shown = ex || nextCust; cell.innerHTML = shown ? `<span class="ro">${esc(shown)}</span>` : `<span class="pend">…</span>`; }
 }
 
 /* ---------- duplicates (asks the database for exact name matches) ---------- */
@@ -1149,7 +1167,7 @@ function renderAlerts() {
 
 /* ---------- dirty / toast / modal ---------- */
 function markDirty() { dirty = true; setDirtyUI(); }
-function setDirtyUI() { $("eDirty").hidden = !dirty; $("btnSave").disabled = !canWrite || busy; $("btnSave").textContent = busy ? "Saving…" : curId ? "Save" : "Save & assign number"; }
+function setDirtyUI() { $("eDirty").hidden = !dirty; $("btnSave").disabled = !canWrite || busy; $("btnSave").textContent = busy ? "Saving…" : "Save"; }
 let toastTimer;
 function toast(msg, undo) { $("toastMsg").textContent = msg; $("toastUndo").hidden = !undo; $("toast").hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $("toast").hidden = true, undo ? 7000 : 3500); }
 function ask(title, body, buttons) {
@@ -1173,6 +1191,7 @@ function onField(e) {
     setPath(cur, g, g === "vatRate" ? num(t.value) : t.value); markDirty();
     if (g === "client.name" || g === "project.name") { if (g === "project.name") ackProject = false; queueDupes(); }
     if (g === "vatRate" || g.startsWith("discount") || g === "client.name") refreshTotals();
+    if (g === "date" && !curId) refreshNext();
     return;
   }
   const row = t.closest("[data-s]");
@@ -1281,9 +1300,10 @@ async function openQuote(id, force) {
 $("btnNew").onclick = () => {
   if (stopQuote) { stopQuote(); stopQuote = null; }
   cur = blankQuote(); cur.preparedBy = me?.name || ""; curId = null; dirty = false; baseUpdatedAt = null; savedStatus = null; savedRev = 0;
-  ackProject = false; remoteChanged = false; dupState = {client: [], project: []};
-  renderEditor(); show("edit"); $("cName").focus();
+  ackProject = false; remoteChanged = false; dupState = {client: [], project: []}; nextNo = ""; nextCust = "";
+  renderEditor(); show("edit"); $("cName").focus(); refreshNext();
 };
+setInterval(() => { if (!curId && cur && !$("vEdit").hidden && !document.hidden) refreshNext(); }, 15000);
 $("btnBack").onclick = async () => { if (await leaveOk()) { if (stopQuote) { stopQuote(); stopQuote = null; } dirty = false; cur = null; curId = null; renderList(); show("list"); } };
 $("regBody").addEventListener("click", e => { const r = e.target.closest("tr[data-id]"); if (r) openQuote(r.dataset.id); });
 $("regBody").addEventListener("keydown", e => { if (e.key === "Enter") { const r = e.target.closest("tr[data-id]"); if (r) openQuote(r.dataset.id); } });
@@ -1342,7 +1362,8 @@ async function save(opts = {}) {
     let full;
     if (!curId) {
       Object.assign(data, {rev: 0, createdAt: now, createdBy: me.email});
-      full = await store.create(data); curId = full.number;
+      const expectNo = nextNo; full = await store.create(data); curId = full.number; nextNo = ""; nextCust = "";
+      if (expectNo && expectNo !== full.number) setTimeout(() => toast(`Saved as ${full.number}. ${expectNo} was taken by someone else a moment ago.`), 1800);
     } else {
       try { full = await store.save(curId, data, baseUpdatedAt, !!opts.force, !!opts.revise); }
       catch (err) {
@@ -1378,20 +1399,21 @@ $("btnRev").onclick = async () => {
     [{k:"cancel",t:"Cancel"},{k:"ok",t:`Save as ${base} R${r + 1}`,pri:true}]);
   if (k !== "ok") return;
   const before = clone(cur);
-  cur.rev = r + 1; cur.status = "Draft";
+  cur.rev = r + 1; cur.status = "Working";
   if (!(await save({revise: true}))) { cur.rev = before.rev; cur.status = before.status; renderEditor(); }
 };
 $("btnDup").onclick = async () => {
   if (!(await leaveOk())) return;
   if (stopQuote) { stopQuote(); stopQuote = null; }
   const c = clone(cur), d = todayISO();
-  Object.assign(c, {number:"", seq:0, rev:0, status:"Draft", date:d, validUntil:addDays(d, num(defaults.validityDays)||7), customerId:"",
+  Object.assign(c, {number:"", seq:0, rev:0, status:"Working", date:d, validUntil:addDays(d, num(defaults.validityDays)||7), customerId:"",
     createdAt:null, createdBy:null, updatedAt:null, updatedBy:null, alertSentRev:null, preparedBy: me?.name || c.preparedBy});
   delete c.contract; delete c.certificate; delete c.handover;
   c.client = {name:"",phone:"",email:"",trn:""}; c.project = {name:"",location:c.project.location,street:"",villa:"",phone:""};
-  cur = c; curId = null; dirty = true; baseUpdatedAt = null; savedStatus = null; savedRev = 0; ackProject = false; remoteChanged = false; dupState = {client:[], project:[]};
+  nextNo = ""; nextCust = ""; cur = c; curId = null; dirty = true; baseUpdatedAt = null; savedStatus = null; savedRev = 0; ackProject = false; remoteChanged = false; dupState = {client:[], project:[]};
   renderEditor(); window.scrollTo(0,0); $("cName").focus();
-  toast("Copied as a new quotation. Enter the client and project, then save to get a number.");
+  toast("Copied as a new quotation. Enter the client and project, then save.");
+  refreshNext();
 };
 $("btnDefaults").onclick = async () => {
   const k = await ask("Use these as the defaults?", "New quotations will start with this quotation's company details, headings and labels, payment schedule, terms and VAT rate. Existing quotations don't change.", [{k:"cancel",t:"Cancel"},{k:"ok",t:"Set as defaults",pri:true}]);
@@ -1477,7 +1499,7 @@ function buildPdf(q, opts = {}) {
   const C = q.company, L = q.labels, T = totals(q);
   const W = 210, H = 297, M = 13, BOT = 15, CW = W - 2*M;
   const SAGE = [127,156,151], DARK = [35,35,35], LINE = [201,210,208], TXT = [28,28,28], ROW = [241,243,243];
-  const number = q.number ? label(q) : "DRAFT";
+  const number = q.number ? label(q) : (nextNo || "");
   const base = {font:"helvetica", fontStyle:"normal", fontSize:8.6, cellPadding:{top:1.6,bottom:1.6,left:1.8,right:1.8}, lineColor:LINE, lineWidth:0.2, textColor:TXT, valign:"middle", overflow:"linebreak"};
   const headCG = {font:"CG", fontStyle:"medium"};
   const room = need => { const y = doc.lastAutoTable ? doc.lastAutoTable.finalY : 0; return y + need <= H - BOT; };
@@ -1571,7 +1593,7 @@ function buildPdf(q, opts = {}) {
     doc.text(`${number}  ·  ${q.project.name || ""}`, M, H - 6); doc.text(`Page ${i} of ${n}`, W - M, H - 6, {align:"right"}); }
   return opts.raw ? doc : doc.output(opts.type || "blob");
 }
-const pdfName = q => `${q.number ? label(q) : "DRAFT"} ${q.project.name || ""}`.replace(/[\\/:*?"<>|]+/g, "-").trim() + ".pdf";
+const pdfName = q => `${q.number ? label(q) : (nextNo || "Quotation")} ${q.project.name || ""}`.replace(/[\\/:*?"<>|]+/g, "-").trim() + ".pdf";
 
 /* ---------- print preview (renders the actual A4 PDF) ---------- */
 let pdfjsReady = null;
@@ -1593,7 +1615,7 @@ function loadPdfjs() {
 async function openPreview() {
   if (!cur) return;
   $("pv").hidden = false; document.body.style.overflow = "hidden";
-  $("pvTitle").textContent = pvMode === "hand" ? `Handover preview · ${label(cur)}` : pvMode === "cert" ? `Certificate preview · ${label(cur)}` : pvMode === "contract" ? `Contract preview · ${label(cur)}` : `Print preview · ${cur.number ? label(cur) : "Draft (no number yet)"}`;
+  $("pvTitle").textContent = pvMode === "hand" ? `Handover preview · ${label(cur)}` : pvMode === "cert" ? `Certificate preview · ${label(cur)}` : pvMode === "contract" ? `Contract preview · ${label(cur)}` : `Print preview · ${cur.number ? label(cur) : (nextNo || "New quotation")}`;
   const box = $("pvPages"); box.innerHTML = `<div class="pv-msg">Laying out A4 pages…</div>`;
   try {
     const data = pvMode === "hand" ? buildHandoverPdf({...cur, handover: ho || cur.handover}, {type:"arraybuffer"}) : pvMode === "cert" ? buildCertPdf({...cur, certificate: cert || cur.certificate}, {type:"arraybuffer"}) : pvMode === "contract" ? buildContractPdf({...cur, contract: con || cur.contract}, {type:"arraybuffer"}) : buildPdf(cur, {type:"arraybuffer"});
@@ -1623,13 +1645,13 @@ function fbMsg(err, fallback) {
     "permission-denied": "Your account isn't allowed to do this. Sign in with a verified " + domainText + " email.",
     "unavailable": "Can't reach the database. Check your internet connection.",
     "auth/invalid-email": "That email address doesn't look right.",
-    "auth/invalid-credential": "Wrong email or password.",
-    "auth/wrong-password": "Wrong email or password.",
+    "auth/invalid-credential": "Wrong email or password. Never set a password? Press “Forgot password?” to make one.",
+    "auth/wrong-password": "Wrong email or password. Never set a password? Press “Forgot password?” to make one.",
     "auth/user-not-found": "No account with that email yet. Use “Create account”.",
     "auth/email-already-in-use": "That email already has an account. Sign in instead, or use “Forgot password”.",
     "auth/weak-password": "Use a password of at least 8 characters.",
     "auth/too-many-requests": "Too many tries. Wait a few minutes and try again.",
-    "auth/quota-exceeded": "Firebase's daily email limit was reached. Try again tomorrow, or sign in with a password.",
+    "auth/quota-exceeded": "Firebase's daily email limit was reached. Try again tomorrow.",
     "auth/unauthorized-continue-uri": "This website's address isn't on Firebase's list of allowed domains yet (Authentication → Settings → Authorized domains).",
     "auth/unauthorized-domain": "This website's address isn't on Firebase's list of allowed domains yet (Authentication → Settings → Authorized domains).",
     "auth/operation-not-allowed": "This sign-in method is switched off in Firebase (Authentication → Sign-in method).",
@@ -1781,7 +1803,7 @@ function authBusy(on) { document.querySelectorAll("#vAuth button").forEach(b => 
 const remember = e => { try { localStorage.setItem("byld_signin_email", e); } catch {} };
 const recalled = () => { try { return localStorage.getItem("byld_signin_email") || ""; } catch { return ""; } };
 async function authRun(fn, okState) {
-  $("aMsg").hidden = true; authBusy(true);
+  $("aMsg").hidden = true; $("aMsg").className = "alert bad"; authBusy(true);
   try { await fn(); if (okState) authView(okState); } catch (err) { $("aMsg").textContent = fbMsg(err, "That didn't work. Try again."); $("aMsg").hidden = false; }
   finally { authBusy(false); }
 }
@@ -1792,14 +1814,14 @@ $("aTabPw").onclick = () => { $("aTabPw").classList.add("on"); $("aTabLink").cla
 $("aSendLink").onclick = () => authRun(async () => { const e = aEmail(); checkDomain(e); await store.auth.sendLink(e); remember(e); $("aSentTo").textContent = e; }, "aLinkSent");
 $("aSignIn").onclick = () => authRun(async () => { const e = aEmail(); checkDomain(e); await store.auth.signInPw(e, $("aPw").value); remember(e); });
 $("aCreate").onclick = () => authRun(async () => { const e = aEmail(); checkDomain(e); if ($("aPw").value.length < 8) throw Object.assign(new Error("Use a password of at least 8 characters."), {code: ""}); await store.auth.createPw(e, $("aPw").value); remember(e); });
-$("aForgot").onclick = () => authRun(async () => { const e = aEmail(); checkDomain(e); await store.auth.reset(e); $("aMsg").textContent = `Password reset email sent to ${e}.`; });
+$("aForgot").onclick = () => authRun(async () => { const e = aEmail(); if (!e) throw Object.assign(new Error("Type your email above first, then press “Forgot password?”."), {code: ""}); checkDomain(e); await store.auth.reset(e); $("aMsg").className = "alert info"; $("aMsg").textContent = `We sent a password reset link to ${e}. Set your new password there, then come back and sign in.`; $("aMsg").hidden = false; });
 $("aBack").onclick = () => authView("aStart");
 $("aFinishBtn").onclick = () => authRun(async () => { const e = $("aFinishEmail").value.trim().toLowerCase(); checkDomain(e); await store.auth.completeLink(e); remember(e); history.replaceState(null, "", SITE_URL); });
 $("aVerified").onclick = () => authRun(async () => { const u = await store.auth.reload(); if (!u.emailVerified) throw Object.assign(new Error("Not verified yet. Click the link in the email first, then press this again."), {code: ""}); onUser(u); });
-$("aResend").onclick = () => authRun(async () => { await store.auth.resendVerify(); $("aMsg").textContent = "Verification email sent again."; });
+$("aResend").onclick = () => authRun(async () => { await store.auth.resendVerify(); $("aMsg").className = "alert info"; $("aMsg").textContent = "Confirmation email sent again."; $("aMsg").hidden = false; });
 $("btnSignOut").onclick = async () => { if (await leaveOk()) { dirty = false; await store.auth.signOut(); } };
 $("aPw").addEventListener("keydown", e => { if (e.key === "Enter") $("aSignIn").click(); });
-$("aEmail").addEventListener("keydown", e => { if (e.key === "Enter" && !$("aLinkBox").hidden) $("aSendLink").click(); });
+$("aEmail").addEventListener("keydown", e => { if (e.key === "Enter") $("aPw").focus(); });
 
 /* ---------- contract (created when a quotation is approved) ---------- */
 const CONTRACT_FALLBACK = {
