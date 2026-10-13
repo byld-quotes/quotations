@@ -8,10 +8,12 @@ window.BYLD_CONFIG = {
     messagingSenderId: "710782307292",
     appId: "1:710782307292:web:c4541138cc67bdebb6dd19"
   },
-  /* Anyone with an email ending in @byld.ae can sign in. */
-  allowedDomain: "byld.ae",
-  /* Extra individual addresses allowed in (e.g. a consultant). Must also be added to firestore.rules. */
-  extraAllowed: [],
-  /* Admins see Settings (Dropbox, email alert, backup) and can change the defaults. Must match firestore.rules. */
-  admins: ["accounts@byld.ae"]
+  /* Anyone with an email ending in these can sign in and work on quotations. Must match firestore.rules. */
+  allowedDomains: ["byld.ae", "kbwrealestate.com"],
+  /* Other individual addresses allowed to sign in. Must also be listed in firestore.rules. */
+  extraAllowed: ["lcrllenado@gmail.com"],
+  /* Only these can see, create and download contracts and completion certificates. Must match firestore.rules. */
+  docAdmins: ["accounts@byld.ae", "lcrllenado@gmail.com", "accounts@kbwrealestate.com"],
+  /* These see Settings (Dropbox, email alert, backup), set defaults and delete forever. Must match firestore.rules. */
+  admins: ["accounts@byld.ae", "lcrllenado@gmail.com", "accounts@kbwrealestate.com"]
 };
