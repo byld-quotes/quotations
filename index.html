@@ -341,19 +341,19 @@ table.ctab{min-width:560px}
     <p class="sub">Use your BYLD or KBW work email.</p>
     <div class="alert bad" id="aMsg" hidden></div>
     <div id="aStart">
-      <div class="atabs" role="tablist"><button class="on" id="aTabLink" role="tab">Email me a link</button><button id="aTabPw" role="tab">Password</button></div>
+      <div class="atabs" role="tablist"><button class="on" id="aTabPw" role="tab">Password</button><button id="aTabLink" role="tab">Email me a link</button></div>
       <label class="lab" for="aEmail">Work email</label>
       <input class="in" id="aEmail" type="email" autocomplete="email" placeholder="name@byld.ae or name@kbwrealestate.com">
-      <div id="aLinkBox">
+      <div id="aLinkBox" hidden>
         <button class="btn pri wide" id="aSendLink">Send sign-in link</button>
-        <p class="fine">We'll email you a link. Open it on this device and you're signed in. No password needed.</p>
+        <p class="fine">We'll email you a link. It signs you in wherever it opens (usually your browser, not the installed app). To sign in inside the app, use Password.</p>
       </div>
-      <div id="aPwBox" hidden>
+      <div id="aPwBox">
         <label class="lab" for="aPw">Password</label>
         <input class="in" id="aPw" type="password" autocomplete="current-password" placeholder="At least 8 characters">
         <button class="btn pri wide" id="aSignIn">Sign in</button>
         <div class="arow"><button class="linkbtn" id="aCreate">Create account</button><button class="linkbtn" id="aForgot">Forgot password</button></div>
-        <p class="fine">First time? Type your email and a new password, then “Create account”. We'll email you a link to confirm the address.</p>
+        <p class="fine">First time? Type your email and a new password, then “Create account”. We'll send one email to confirm the address. After that, you sign in here with your email and password only.</p>
       </div>
     </div>
     <div id="aLinkSent" hidden>
@@ -368,7 +368,8 @@ table.ctab{min-width:560px}
       <button class="btn pri wide" id="aFinishBtn">Finish signing in</button>
     </div>
     <div id="aVerify" hidden>
-      <p>We sent a confirmation link to <b id="aVerifyEmail"></b>. Click it, then come back here.</p>
+      <p>One-time step: we sent a confirmation link to <b id="aVerifyEmail"></b>.</p>
+      <p class="fine">Click the link in that email (it may open in your browser, that's fine), then come back to this window. It continues on its own within a few seconds. You only do this once.</p>
       <button class="btn pri wide" id="aVerified">I've confirmed my email</button>
       <div class="arow"><button class="linkbtn" id="aResend">Send the link again</button></div>
     </div>
@@ -637,7 +638,7 @@ table.ctab{min-width:560px}
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastUndo" hidden>Undo</button></div>
 <div class="umenu" id="umenu" hidden role="dialog" aria-label="Choose a unit"></div>
 
-<script src="firebase-config.js"></script>
+<script src="firebase-config.js?v=3"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script type="module">
@@ -1767,7 +1768,10 @@ $("sRestore").onchange = async e => {
   } catch (err) { toast(fbMsg(err, "That file couldn't be read as a backup.")); } };
 
 /* ---------- sign-in ---------- */
+let verifyPoll = null;
 function authView(state, msg) {
+  clearInterval(verifyPoll); verifyPoll = null;
+  if (state === "aVerify" && !DEMO) verifyPoll = setInterval(async () => { if (document.hidden) return; try { const u = await store.auth.reload(); if (u && u.emailVerified) { clearInterval(verifyPoll); verifyPoll = null; onUser(u); } } catch {} }, 4000);
   ["aStart","aLinkSent","aFinish","aVerify","aDenied"].forEach(id => $(id).hidden = id !== state);
   $("aMsg").textContent = msg || ""; $("aMsg").hidden = !msg;
   $("whoChip").hidden = true; $("btnSignOut").hidden = state === "aStart" || state === "aLinkSent" || state === "aFinish"; $("btnSettings").hidden = true;
