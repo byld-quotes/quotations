@@ -38,6 +38,12 @@ service cloud.firestore {
     match /private/{id} {
       allow read, write: if admin();
     }
+    // Who is signed in and which quotation they have open (each person writes only their own)
+    match /presence/{uid} {
+      allow read: if staff();
+      allow write: if staff() && request.auth.uid == uid
+        && request.resource.data.email == request.auth.token.email.lower();
+    }
     match /settings/{id} {
       allow read: if staff();
       allow write: if admin();

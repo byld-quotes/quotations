@@ -267,6 +267,13 @@ img{max-width:100%}
 .dbx.ok{color:var(--good);background:transparent;box-shadow:inset 0 0 0 1px currentColor}
 .dbx.pend{color:var(--muted);background:var(--chip)}
 .dbx.bad{color:var(--bad);background:var(--bad-bg)}
+.live{width:fit-content;display:inline-flex;align-items:center;gap:5px;margin-left:8px;font:500 11px/1.4 var(--f-head);padding:1px 8px;border-radius:999px;vertical-align:1px;white-space:nowrap;color:var(--info-fg);background:var(--info-bg)}
+.live.ed{color:#8A4B00;background:#FFF1D6}
+.live i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+#whoChip{cursor:pointer;border:0;font:inherit;font-size:12px}
+#whoChip:hover{color:var(--ink,inherit)}
+.modal input.in{width:100%;margin:4px 0 14px}
 .demo{background:var(--warn-bg);color:var(--warn-fg);border-bottom:1px solid var(--warn-line);padding:8px 16px;font-size:13px;text-align:center}
 .folders{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;border-bottom:1px solid var(--line)}
 .folders button{border:0;background:transparent;padding:9px 12px 8px;cursor:pointer;font:500 14.5px/1 var(--f-head);color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
@@ -328,7 +335,7 @@ table.ctab{min-width:560px}
   <span id="topLogo"></span>
   <h1>Quotations</h1>
   <span class="sp"></span>
-  <span class="chip" id="whoChip" hidden></span>
+  <button class="chip" id="whoChip" hidden title="Change the name colleagues see"></button>
   <button class="btn ghost sm" id="btnSettings" hidden>Settings</button>
   <button class="btn ghost sm" id="btnSignOut" hidden>Sign out</button>
 </div></header>
@@ -398,7 +405,7 @@ table.ctab{min-width:560px}
       <input id="fSearch" type="search" placeholder="Search quote no., client or project" aria-label="Search">
     </div>
     <div class="tablebox"><table class="reg">
-      <thead><tr><th>Quote no.</th><th>Date</th><th>Client</th><th>Project</th><th class="r">Total incl. VAT (AED)</th><th>Status</th><th>Engineer</th></tr></thead>
+      <thead><tr><th>Quote no.</th><th>Date</th><th>Client</th><th>Project</th><th class="r">Total incl. VAT (AED)</th><th>Status</th><th>Engineer</th><th>Last edited</th></tr></thead>
       <tbody id="regBody"></tbody>
     </table>
     <div class="empty" id="regEmpty">Loading quotations…</div></div>
@@ -783,7 +790,7 @@ function summaryOf(q) {
   return { deleted: !!q.deleted, number:q.number, rev:q.rev ?? 0, seq:q.seq || 0, date:q.date, status:fixStatus(q.status),
     clientName:q.client?.name || "", clientKey:normName(q.client?.name), projectName:q.project?.name || "", projectKey:normName(q.project?.name),
     location:q.project?.location || "", customerId:q.customerId || "", totalIncVat:q.totalIncVat || 0, engineer:q.preparedBy || "",
-    updatedAt:q.updatedAt || "", updatedBy:q.updatedBy || "" };
+    updatedAt:q.updatedAt || "", updatedBy:q.updatedBy || "", updatedByName:q.updatedByName || "", createdBy:q.createdBy || "", createdByName:q.createdByName || "" };
 }
 
 /* ---------- data store: Firebase (live) ---------- */
@@ -848,6 +855,9 @@ async function firebaseStore() {
       });
     },
     patchIndex: (id, data) => setDoc(doc(fs, "index", id), data, {merge: true}),
+    setPresence: (uid, d) => setDoc(doc(fs, "presence", uid), {...d, at: F.serverTimestamp()}, {merge: true}),
+    getPresence: async uid => { const s = await getDoc(doc(fs, "presence", uid)); return s.exists() ? s.data() : null; },
+    watchPresence: cb => onSnapshot(collection(fs, "presence"), s => cb(s.docs.map(d => { const x = d.data({serverTimestamps: "estimate"}); return {...x, uid: d.id, at: x.at?.toMillis ? x.at.toMillis() : 0}; })), () => {}),
     getPrivate: async id => { const s = await getDoc(doc(fs, "contracts", id)); return s.exists() ? s.data() : null; },
     getBrand: async () => { const s = await getDoc(doc(fs, "private", "brand")); return s.exists() ? s.data() : {}; },
     setBrand: b => setDoc(doc(fs, "private", "brand"), b),
@@ -885,7 +895,7 @@ async function firebaseStore() {
 
 /* ---------- data store: demo (in memory, for trying the site with ?demo) ---------- */
 function demoStore() {
-  const Q = new Map(), I = new Map(), S = new Map(), C = new Map(), P = new Map(), subs = new Set(), qsubs = new Map();
+  const Q = new Map(), I = new Map(), S = new Map(), C = new Map(), P = new Map(), PR = new Map(), prs = new Set(), subs = new Set(), qsubs = new Map();
   const fire = () => { subs.forEach(f => f()); };
   const fireQ = id => (qsubs.get(id) || []).forEach(f => f());
   const user = {email: ADMINS[0] || ("demo@" + DOMAIN), emailVerified: true, uid: "demo"};
@@ -910,6 +920,10 @@ function demoStore() {
       Q.set(id, clone(data)); I.set(id, {...(I.get(id) || {}), ...summaryOf(data)}); fire(); fireQ(id); return clone(data);
     },
     patchIndex: async (id, d) => { I.set(id, {...(I.get(id) || {}), ...clone(d)}); fire(); },
+    setPresence: async (uid, d) => { PR.set(uid, {...(PR.get(uid) || {}), ...clone(d), uid, at: Date.now()}); prs.forEach(f => f()); },
+    getPresence: async uid => PR.has(uid) ? clone(PR.get(uid)) : (uid === "demo" ? {name: "Accounts"} : null),
+    watchPresence(cb) { const f = () => cb([...PR.values()].map(clone)); prs.add(f); setTimeout(f, 20); return () => prs.delete(f); },
+    _simulatePresence(uid, d) { PR.set(uid, {uid, at: Date.now(), ...d}); prs.forEach(f => f()); },
     patchQuote: async (id, d) => { Q.set(id, {...(Q.get(id) || {}), ...clone(d)}); fireQ(id); },
     removeForever: async id => { Q.delete(id); I.delete(id); P.delete(id); fire(); },
     getPrivate: async id => P.has(id) ? clone(P.get(id)) : null,
@@ -929,7 +943,7 @@ function demoStore() {
 }
 
 /* ---------- register ---------- */
-function show(view) { view = {list: "vList", edit: "vEdit"}[view] || view; ["vAuth","vList","vEdit","vSet","vCon","vCert","vHand"].forEach(v => $(v).hidden = v !== view); window.scrollTo(0,0); if (view === "vEdit") requestAnimationFrame(sizeAll); }
+function show(view) { view = {list: "vList", edit: "vEdit"}[view] || view; ["vAuth","vList","vEdit","vSet","vCon","vCert","vHand"].forEach(v => $(v).hidden = v !== view); queueMicrotask(() => presenceTick()); window.scrollTo(0,0); if (view === "vEdit") requestAnimationFrame(sizeAll); }
 function startIndex() {
   if (stopIndex) stopIndex();
   stopIndex = store.watchIndex(indexLimit, rows => {
@@ -945,6 +959,73 @@ function dbChip(d) {
   if (x.status === "failed") return `<span class="dbx bad" title="${esc(x.error || "")}">Dropbox upload failed</span>`;
   return `<span class="dbx pend">Dropbox: pending</span>`;
 }
+/* ---------- who's who and who's here ---------- */
+let people = new Map(), presence = [];          // uid -> {email, name, quoteId, editing, at}
+const PRESENCE_FRESH = 7 * 60 * 1000;
+const titleCase = t => t.replace(/[._-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()).trim();
+function nameFor(email, name) {
+  if (name) return name;
+  const e = String(email || "").toLowerCase();
+  for (const p of people.values()) if (p.email === e && p.name) return p.name;
+  return titleCase(e.split("@")[0] || "Someone");
+}
+const joinNames = list => { const n = list.map(o => nameFor(o.email, o.name)); return n.length < 3 ? n.join(" and ") : n.slice(0, -1).join(", ") + " and " + n.at(-1); };
+function fmtWhen(iso) {
+  if (!iso) return ""; const d = new Date(iso); if (isNaN(d)) return "";
+  const t = d.toLocaleTimeString("en-GB", {hour: "2-digit", minute: "2-digit"});
+  const today = new Date(); if (d.toDateString() === today.toDateString()) return "Today, " + t;
+  const y = new Date(today); y.setDate(today.getDate() - 1); if (d.toDateString() === y.toDateString()) return "Yesterday, " + t;
+  return d.toLocaleDateString("en-GB", {day: "numeric", month: "short", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric"}) + ", " + t;
+}
+const freshP = () => presence.filter(p => p.uid !== me?.uid && p.quoteId && Date.now() - (p.at || 0) < PRESENCE_FRESH);
+const othersOn = id => id ? freshP().filter(p => p.quoteId === id) : [];
+function liveChip(id) {
+  const o = othersOn(id); if (!o.length) return "";
+  const eds = o.filter(x => x.editing);
+  const vws = o.filter(x => !x.editing);
+  return (eds.length ? `<span class="live ed" title="Editing now, not saved yet"><i></i>${esc(joinNames(eds))} editing</span>` : "")
+       + (vws.length ? `<span class="live" title="Has it open"><i></i>${esc(joinNames(vws))} viewing</span>` : "");
+}
+let presSent = {key: "", at: 0}, stopPresence = null;
+function myPresenceState() {
+  const inEditor = cur && !$("vEdit").hidden;
+  return {quoteId: inEditor && curId ? curId : null, editing: !!(inEditor && curId && dirty)};
+}
+function presenceTick(force) {
+  if (!me || !store?.setPresence) return;
+  const st = myPresenceState(), key = `${st.quoteId}|${st.editing}|${me.name}`;
+  const due = st.quoteId && Date.now() - presSent.at > 3 * 60 * 1000;
+  if (!force && key === presSent.key && !due) return;
+  presSent = {key, at: Date.now()};
+  store.setPresence(me.uid, {email: me.email, name: me.name || "", ...st}).catch(() => {});
+}
+setInterval(() => presenceTick(), 15000);
+addEventListener("pagehide", () => { if (me && store?.setPresence) store.setPresence(me.uid, {email: me.email, name: me.name || "", quoteId: null, editing: false}).catch(() => {}); });
+function startPresence() {
+  if (stopPresence) stopPresence();
+  stopPresence = store.watchPresence(list => {
+    presence = list; people = new Map(list.map(p => [p.uid, p]));
+    if (!$("vList").hidden) renderList(); else if (!$("vEdit").hidden) renderAlerts();
+  });
+}
+async function askName(first) {
+  return new Promise(res => {
+    $("mT").textContent = first ? "What's your name?" : "Change your name";
+    $("mB").innerHTML = `This is how colleagues see you on quotations, for example “Edited by Anees” or “Sajid is editing”.<input class="in" id="nmIn" maxlength="40" autocomplete="name" placeholder="Your name">`;
+    $("mR").innerHTML = (first ? "" : `<button class="btn" data-k="cancel">Cancel</button>`) + `<button class="btn pri" data-k="ok">Save</button>`;
+    $("scrim").hidden = false; const i = $("nmIn"); i.value = first ? titleCase(me.email.split("@")[0]) : (me.name || ""); i.focus(); i.select();
+    const done = k => { const v = i.value.trim().replace(/\s+/g, " "); if (k === "ok" && !v) { i.focus(); return; } $("scrim").hidden = true; res(k === "ok" ? v : null); };
+    i.onkeydown = e => { if (e.key === "Enter") done("ok"); };
+    $("mR").onclick = e => { const k = e.target.closest("[data-k]")?.dataset.k; if (k) done(k); };
+  });
+}
+async function setMyName(first) {
+  const v = await askName(first); if (!v) return;
+  me.name = v; $("whoChip").textContent = v; $("whoChip").title = me.email + " · click to change your name";
+  presenceTick(true); toast(first ? `Welcome, ${v}` : "Name updated");
+}
+$("whoChip").onclick = () => setMyName(false);
+
 function renderList() {
   const s = $("fSearch").value.trim().toLowerCase();
   const all0 = [...index.values()], cnt = {};
@@ -955,13 +1036,14 @@ function renderList() {
     .filter(d => inFolder(d, folder) && (!s || [d.number, d.clientName, d.projectName, d.customerId, d.location].join(" ").toLowerCase().includes(s)))
     .sort((a,b) => (b.date||"").localeCompare(a.date||"") || (b.seq||0) - (a.seq||0));
   $("regBody").innerHTML = rows.map(d => `<tr data-id="${esc(d.id)}" tabindex="0">
-    <td><span class="qno">${esc(label(d))}</span>${dbChip(d)}${isDocAdmin && d.hasContract && !d.deleted ? `<span class="dbx ok">Contract</span>` : ""}${isDocAdmin && d.hasCert && !d.deleted ? (d.certDone ? `<span class="dbx ok">Completed</span>` : `<span class="dbx pend">Completion pending</span>`) : ""}${isDocAdmin && d.handoverDone && !d.deleted ? `<span class="dbx ok">Handed over</span>` : ""}</td>
+    <td><span class="qno">${esc(label(d))}</span>${liveChip(d.id)}${dbChip(d)}${isDocAdmin && d.hasContract && !d.deleted ? `<span class="dbx ok">Contract</span>` : ""}${isDocAdmin && d.hasCert && !d.deleted ? (d.certDone ? `<span class="dbx ok">Completed</span>` : `<span class="dbx pend">Completion pending</span>`) : ""}${isDocAdmin && d.handoverDone && !d.deleted ? `<span class="dbx ok">Handed over</span>` : ""}</td>
     <td class="tn">${esc(fmtD(d.date))}</td>
     <td>${esc(d.clientName)}<div class="sub-t">${esc(d.customerId || "")}</div></td>
     <td>${esc(d.projectName)}<div class="sub-t">${esc(d.location || "")}</div></td>
     <td class="r tn">${fmt(d.totalIncVat)}</td>
     <td><span class="status st-${esc(fixStatus(d.status))}">${esc(fixStatus(d.status))}</span></td>
-    <td>${esc(d.engineer || "")}</td></tr>`).join("");
+    <td>${esc(d.engineer || "")}</td>
+    <td>${d.updatedBy ? `${esc(nameFor(d.updatedBy, d.updatedByName))}<div class="sub-t">${esc(fmtWhen(d.updatedAt))}</div>` : ""}${d.createdBy && d.createdBy !== d.updatedBy ? `<div class="sub-t">Created by ${esc(nameFor(d.createdBy, d.createdByName))}</div>` : ""}</td></tr>`).join("");
   const e = $("regEmpty"); e.hidden = rows.length > 0;
   e.textContent = !loaded ? "Loading quotations…" : !index.size ? "No quotations yet. Use “New quotation” to create the first one." : s ? "No quotations match this search in this folder." : FOLDER_EMPTY[folder];
   $("btnMore").hidden = !indexMore;
@@ -1154,7 +1236,11 @@ function dupes() { return dupState; }
 function renderAlerts() {
   if (!cur) return;
   const out = [], d = dupes();
-  if (cur.deleted) out.push(`<div class="alert bad"><div class="msg"><b>This quotation is in the Deleted folder.</b> Deleted by ${esc(cur.deletedBy || "someone")} on ${esc(fmtD((cur.deletedAt || "").slice(0,10)))}. Restore it to edit it again.</div><button class="btn sm" data-a="restore">Restore</button>${isAdmin ? `<button class="btn sm" data-a="purge">Delete forever</button>` : ""}</div>`);
+  if (cur.deleted) out.push(`<div class="alert bad"><div class="msg"><b>This quotation is in the Deleted folder.</b> Deleted by ${esc(cur.deletedBy ? nameFor(cur.deletedBy, cur.deletedByName) : "someone")} on ${esc(fmtD((cur.deletedAt || "").slice(0,10)))}. Restore it to edit it again.</div><button class="btn sm" data-a="restore">Restore</button>${isAdmin ? `<button class="btn sm" data-a="purge">Delete forever</button>` : ""}</div>`);
+  const others = othersOn(curId || null);
+  const eds = others.filter(o => o.editing), vws = others.filter(o => !o.editing);
+  if (eds.length) out.push(`<div class="alert warn"><div class="msg"><b>${esc(joinNames(eds))} ${eds.length > 1 ? "are" : "is"} editing this quotation right now</b> and ${eds.length > 1 ? "have" : "has"}n't saved yet. Agree who saves first, or one of you will have to overwrite the other's changes.</div></div>`);
+  if (vws.length) out.push(`<div class="alert info"><div class="msg"><b>${esc(joinNames(vws))}</b> also ${vws.length > 1 ? "have" : "has"} this quotation open.</div></div>`);
   if (remoteChanged) out.push(`<div class="alert bad"><div class="msg"><b>Someone else saved this quotation while you had it open.</b> Reload to see their version. Saving now asks before overwriting it.</div><button class="btn sm" data-a="reload">Reload</button></div>`);
   if (d.project.length) out.push(`<div class="alert warn"><div class="msg"><b>The project name “${esc(cur.project.name)}” is already used</b> on ${d.project.map(x => `<button class="linkbtn" data-open="${esc(x.id)}">${esc(label(x))}</button> (${esc(x.clientName)}, ${esc(fmtD(x.date))}, ${esc(fixStatus(x.status))})`).join(", ")}. If this is a change to that job, open it and revise it instead.</div></div>`);
   if (d.client.length) out.push(`<div class="alert info"><div class="msg"><b>${esc(cur.client.name)} is an existing client</b> with ${d.client.length}${d.client.length >= 12 ? "+" : ""} other quotation${d.client.length>1?"s":""}: ${d.client.slice(0,4).map(x => `<button class="linkbtn" data-open="${esc(x.id)}">${esc(label(x))}</button>`).join(", ")}${d.client.length>4?"…":""}. This quotation will use the same customer ID.</div></div>`);
@@ -1167,7 +1253,7 @@ function renderAlerts() {
 
 /* ---------- dirty / toast / modal ---------- */
 function markDirty() { dirty = true; setDirtyUI(); }
-function setDirtyUI() { $("eDirty").hidden = !dirty; $("btnSave").disabled = !canWrite || busy; $("btnSave").textContent = busy ? "Saving…" : "Save"; }
+function setDirtyUI() { queueMicrotask(() => presenceTick()); $("eDirty").hidden = !dirty; $("btnSave").disabled = !canWrite || busy; $("btnSave").textContent = busy ? "Saving…" : "Save"; }
 let toastTimer;
 function toast(msg, undo) { $("toastMsg").textContent = msg; $("toastUndo").hidden = !undo; $("toast").hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $("toast").hidden = true, undo ? 7000 : 3500); }
 function ask(title, body, buttons) {
@@ -1280,7 +1366,7 @@ function watchCurrent() {
   stopQuote = store.watchQuote(id, live => {
     if (id !== curId || !live || !cur) return;
     if ((live.updatedAt || null) !== (baseUpdatedAt || null) && live.writeTab !== tabId) {
-      if (!dirty) { const keep = {contract: cur.contract, certificate: cur.certificate, handover: cur.handover}; cur = Object.assign(hydrate(live), keep); baseUpdatedAt = live.updatedAt || null; savedStatus = cur.status; savedRev = cur.rev; renderEditor(); toast(`${label(live)} was updated by ${live.updatedBy || "someone else"}`); }
+      if (!dirty) { const keep = {contract: cur.contract, certificate: cur.certificate, handover: cur.handover}; cur = Object.assign(hydrate(live), keep); baseUpdatedAt = live.updatedAt || null; savedStatus = cur.status; savedRev = cur.rev; renderEditor(); toast(`${label(live)} was updated by ${live.updatedBy ? nameFor(live.updatedBy, live.updatedByName) : "someone else"}`); }
       else { remoteChanged = true; renderAlerts(); }
     }
   }, () => {});
@@ -1358,10 +1444,10 @@ async function save(opts = {}) {
     const data = cleanForSave(cur);
     if (!data.customerId) data.customerId = existingCustomerId();
     const now = new Date().toISOString();
-    Object.assign(data, {updatedAt: now, updatedBy: me.email, writeTab: tabId});
+    Object.assign(data, {updatedAt: now, updatedBy: me.email, updatedByName: me.name || "", writeTab: tabId});
     let full;
     if (!curId) {
-      Object.assign(data, {rev: 0, createdAt: now, createdBy: me.email});
+      Object.assign(data, {rev: 0, createdAt: now, createdBy: me.email, createdByName: me.name || ""});
       const expectNo = nextNo; full = await store.create(data); curId = full.number; nextNo = ""; nextCust = "";
       if (expectNo && expectNo !== full.number) setTimeout(() => toast(`Saved as ${full.number}. ${expectNo} was taken by someone else a moment ago.`), 1800);
     } else {
@@ -1371,7 +1457,7 @@ async function save(opts = {}) {
         busy = false; setDirtyUI();
         const live = err.live;
         const k = await ask("This quotation changed since you opened it",
-          `${live.updatedBy || "Someone else"} saved ${label(live)} after you opened it. Overwriting replaces their changes with yours.`,
+          `${live.updatedBy ? nameFor(live.updatedBy, live.updatedByName) : "Someone else"} saved ${label(live)} after you opened it. Overwriting replaces their changes with yours.`,
           [{k:"cancel",t:"Cancel"},{k:"reload",t:"Load their version"},{k:"over",t:"Overwrite with mine",pri:true}]);
         if (k === "reload") { loadIntoEditor(live, curId); return false; }
         if (k !== "over") return false;
@@ -1407,7 +1493,7 @@ $("btnDup").onclick = async () => {
   if (stopQuote) { stopQuote(); stopQuote = null; }
   const c = clone(cur), d = todayISO();
   Object.assign(c, {number:"", seq:0, rev:0, status:"Working", date:d, validUntil:addDays(d, num(defaults.validityDays)||7), customerId:"",
-    createdAt:null, createdBy:null, updatedAt:null, updatedBy:null, alertSentRev:null, preparedBy: me?.name || c.preparedBy});
+    createdAt:null, createdBy:null, createdByName:null, updatedAt:null, updatedBy:null, updatedByName:null, alertSentRev:null, preparedBy: me?.name || c.preparedBy});
   delete c.contract; delete c.certificate; delete c.handover;
   c.client = {name:"",phone:"",email:"",trn:""}; c.project = {name:"",location:c.project.location,street:"",villa:"",phone:""};
   nextNo = ""; nextCust = ""; cur = c; curId = null; dirty = true; baseUpdatedAt = null; savedStatus = null; savedRev = 0; ackProject = false; remoteChanged = false; dupState = {client:[], project:[]};
@@ -1446,9 +1532,9 @@ async function setDeleted(flag) {
     if (k !== "ok") return;
   }
   const now = new Date().toISOString();
-  const patch = flag ? {deleted: true, deletedAt: now, deletedBy: me.email} : {deleted: false, restoredAt: now, restoredBy: me.email};
+  const patch = flag ? {deleted: true, deletedAt: now, deletedBy: me.email, deletedByName: me.name || ""} : {deleted: false, restoredAt: now, restoredBy: me.email};
   try {
-    await store.patchQuote(curId, {...patch, updatedAt: now, updatedBy: me.email, writeTab: tabId});
+    await store.patchQuote(curId, {...patch, updatedAt: now, updatedBy: me.email, updatedByName: me.name || "", writeTab: tabId});
     await store.patchIndex(curId, {deleted: !!flag, updatedAt: now});
     Object.assign(cur, patch); baseUpdatedAt = now; dirty = false;
     if (flag) { toast(`${label(cur)} moved to Deleted`); if (stopQuote) { stopQuote(); stopQuote = null; } cur = null; curId = null; folder = "deleted"; renderList(); show("list"); }
@@ -1819,7 +1905,7 @@ $("aBack").onclick = () => authView("aStart");
 $("aFinishBtn").onclick = () => authRun(async () => { const e = $("aFinishEmail").value.trim().toLowerCase(); checkDomain(e); await store.auth.completeLink(e); remember(e); history.replaceState(null, "", SITE_URL); });
 $("aVerified").onclick = () => authRun(async () => { const u = await store.auth.reload(); if (!u.emailVerified) throw Object.assign(new Error("Not verified yet. Click the link in the email first, then press this again."), {code: ""}); onUser(u); });
 $("aResend").onclick = () => authRun(async () => { await store.auth.resendVerify(); $("aMsg").className = "alert info"; $("aMsg").textContent = "Confirmation email sent again."; $("aMsg").hidden = false; });
-$("btnSignOut").onclick = async () => { if (await leaveOk()) { dirty = false; await store.auth.signOut(); } };
+$("btnSignOut").onclick = async () => { if (await leaveOk()) { dirty = false; if (stopPresence) { stopPresence(); stopPresence = null; } try { await store.setPresence?.(me.uid, {email: me.email, name: me.name || "", quoteId: null, editing: false}); } catch {} await store.auth.signOut(); } };
 $("aPw").addEventListener("keydown", e => { if (e.key === "Enter") $("aSignIn").click(); });
 $("aEmail").addEventListener("keydown", e => { if (e.key === "Enter") $("aPw").focus(); });
 
@@ -2461,10 +2547,12 @@ function onUser(u) {
   if (!u) { if (stopIndex) { stopIndex(); stopIndex = null; } $("aEmail").value = recalled(); authView("aStart"); return; }
   if (!allowedEmail(u.email)) { $("aDeniedEmail").textContent = u.email; authView("aDenied"); return; }
   if (!u.emailVerified) { $("aVerifyEmail").textContent = u.email; authView("aVerify"); return; }
-  me = {email: u.email, name: ""};
+  me = {email: u.email, name: "", uid: u.uid};
   isAdmin = ADMINS.includes(u.email); isDocAdmin = DOC_ADMINS.includes(u.email);
   if (isDocAdmin) store.getBrand().then(b => { brand = b || {}; if (!$("vSet").hidden) renderBrand(); }).catch(() => {});
-  $("whoChip").textContent = u.email; $("whoChip").hidden = false; $("btnSignOut").hidden = false; $("btnSettings").hidden = !isAdmin;
+  $("whoChip").textContent = u.email; $("whoChip").title = u.email; $("whoChip").hidden = false;
+  startPresence();
+  store.getPresence(u.uid).then(p => { if (p?.name) { me.name = p.name; $("whoChip").textContent = p.name; $("whoChip").title = u.email + " · click to change your name"; presenceTick(true); } else setMyName(true); }).catch(() => presenceTick(true)); $("btnSignOut").hidden = false; $("btnSettings").hidden = !isAdmin;
   $("demoBanner").hidden = !store.demo;
   store.watchSetting("defaults", v => { if (v) defaults = {...clone(FALLBACK), ...clone(v), company:{...FALLBACK.company, ...(v.company||{})}, labels:{...FALLBACK.labels, ...(v.labels||{})}}; });
   store.watchSetting("integrations", v => { integ = v || {}; if (!$("vList").hidden) renderList(); });
