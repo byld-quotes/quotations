@@ -1180,7 +1180,7 @@ function renderEditor() {
   </div>
 
   <div class="signs">
-    <div class="s">${inp("company.name", C.name, "Company", "")}${inp("company.signatory", C.signatory, "Signatory", "l")}${inp("company.signTitle", C.signTitle, "Title", "l")}</div>
+    <div class="s">${inp("company.name", C.name, "Company", "")}</div>
     <div class="s">${inp("labels.client", L.client, "Label")}${inp("labels.clientSub", L.clientSub, "Sub-label", "l")}</div>
   </div>`;
   $("sheet").querySelectorAll("textarea").forEach(autosize);
@@ -1668,7 +1668,7 @@ function buildPdf(q, opts = {}) {
   /* signatures */
   y = doc.lastAutoTable.finalY + 20; if (y + 14 > H - BOT) { doc.addPage(); y = M + 24; }
   const sw = (CW - 30) / 2;
-  [[C.name, C.signatory + (C.signTitle ? ` (${C.signTitle})` : "")], [L.client, L.clientSub]].forEach(([a,b], i) => {
+  [[C.name, ""], [L.client, L.clientSub]].forEach(([a,b], i) => {
     const x = M + i * (sw + 30); doc.setDrawColor(...TXT); doc.setLineWidth(0.25); doc.line(x, y, x + sw, y);
     doc.setTextColor(...TXT); doc.setFont("CG","medium"); doc.setFontSize(8); const al = doc.splitTextToSize(a || "", sw); doc.text(al, x, y + 4);
     doc.setFont("CG","light"); doc.text(doc.splitTextToSize(b || "", sw), x, y + 4 + al.length * 3.6); });
