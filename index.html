@@ -267,6 +267,59 @@ img{max-width:100%}
 .dbx.ok{color:var(--good);background:transparent;box-shadow:inset 0 0 0 1px currentColor}
 .dbx.pend{color:var(--muted);background:var(--chip)}
 .dbx.bad{color:var(--bad);background:var(--bad-bg)}
+/* ---------- renders presentation ---------- */
+.newbtns{display:flex;flex-direction:column;gap:8px}
+.rn-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:20px;align-items:start;padding-block:20px 60px}
+.rn-grid>div{min-width:0}
+.rn-grid .card{margin-bottom:16px}
+.rn-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rn-tg{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.rn-tg label{display:flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
+.rn-drop{margin-top:6px;border:2px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer}
+.rn-drop b{color:var(--accent)}
+.rn-drop.over{border-color:var(--accent);background:var(--row)}
+.rn-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.rn-item{display:grid;grid-template-columns:22px 26px 96px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.rn-item.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.rn-item.drag{opacity:.4}
+.rn-item .h{cursor:grab;color:var(--muted);font-size:18px;text-align:center;user-select:none;touch-action:none}
+.rn-item .n{font:500 13px/1 var(--f-head);color:var(--muted);text-align:center}
+.rn-item img{width:96px;height:64px;object-fit:cover;border-radius:4px;display:block}
+.rn-item input{width:100%;font:inherit;font-size:14px;text-transform:uppercase;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+.rn-item .ar{display:flex;gap:4px}
+.rn-ib{width:30px;height:30px;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:6px;cursor:pointer;font-size:14px;line-height:1;padding:0}
+.rn-ib.x{color:var(--bad)}
+.rn-prev{position:sticky;top:70px}
+.rn-pages{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-top:12px}
+.rn-pages .pg{flex:0 0 116px;cursor:pointer;border-radius:4px;outline:2px solid transparent;outline-offset:1px}
+.rn-pages .pg.sel{outline-color:var(--accent)}
+.rn-cap{font-size:11.5px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rn-slide{width:100%;aspect-ratio:297/210;background:#0F3538;position:relative;overflow:hidden;container-type:inline-size;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.rn-tb{position:absolute;left:0;right:0;top:0;height:13.6%;display:grid;grid-template-columns:17.3% 29.4% 1fr;background:#F2F2F2;color:#111;border:.15cqw solid #1F2A44;font-family:Arial,Helvetica,sans-serif;font-size:1.13cqw;line-height:1.3}
+.rn-tb>div{border-right:.12cqw solid #1F2A44;padding:.9cqw 1cqw;min-width:0;overflow:hidden}
+.rn-tb>div:last-child{border-right:0}
+.rn-tb .dt{display:flex;gap:.8cqw}.rn-tb .dt b{font-weight:400;white-space:nowrap}
+.rn-tb .mid{padding:0;display:grid;grid-template-rows:1fr 1fr}
+.rn-tb .mid>div{padding:.9cqw 1.2cqw;display:flex;gap:2.2cqw}
+.rn-tb .mid>div+div{border-top:.12cqw solid #1F2A44;align-items:center}
+.rn-tb .disc{font-size:.92cqw;line-height:1.36}
+.rn-tb .disc .t{font-size:1.13cqw}
+.rn-slide .ph{position:absolute;left:6.7%;right:6.6%;top:15.7%;bottom:2.4%;background:#0b2a2d center/cover no-repeat}
+.rn-slide.cover{display:flex;align-items:center;justify-content:center}
+.rn-slide.cover svg{width:31.6%;height:auto}
+.rn-slide svg .ink{fill:#F8F6EE}
+.rn-slide.title{color:#F8F6EE}
+.rn-slide.title .l{position:absolute;left:50%;top:36%;bottom:36%;width:.12cqw;background:#F8F6EE}
+.rn-slide.title span{position:absolute;top:50%;transform:translateY(-50%);font:300 3.4cqw/1 var(--f-head);letter-spacing:.02em;white-space:nowrap}
+.rn-slide.title .a{right:58.5%}.rn-slide.title .b{left:57.2%}
+.rn-slide.thanks{display:flex;align-items:center;justify-content:center;color:#F8F6EE}
+.rn-slide.thanks b{font:300 6.3cqw/1 var(--f-head);letter-spacing:.02em}
+.rn-slide.thanks svg{position:absolute;bottom:1.6%;left:50%;transform:translateX(-50%);width:4.1%;height:auto}
+.rn-thumbs{display:flex;gap:4px}.rn-thumbs img{width:46px;height:31px;object-fit:cover;border-radius:3px;display:block}
+.rn-hint{font-size:13.5px;color:var(--muted);margin:10px 2px 0}
+@media (max-width:900px){.rn-grid{grid-template-columns:minmax(0,1fr)}.rn-prev{position:static}}
+@media (max-width:560px){.rn-item{grid-template-columns:20px 72px minmax(0,1fr)}.rn-item .n{display:none}.rn-item img{width:72px;height:48px}.rn-item .ar{grid-column:1/-1;justify-content:flex-end}.rn-row2{grid-template-columns:1fr}}
+
 .live{width:fit-content;display:inline-flex;align-items:center;gap:5px;margin-left:8px;font:500 11px/1.4 var(--f-head);padding:1px 8px;border-radius:999px;vertical-align:1px;white-space:nowrap;color:var(--info-fg);background:var(--info-bg)}
 .live.ed{color:#8A4B00;background:#FFF1D6}
 .live i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
@@ -391,7 +444,7 @@ table.ctab{min-width:560px}
   <div class="wrap">
     <div class="reg-head">
       <div><h2>Quotation register</h2><p>Numbers follow the date and the day's count (131026-1, 131026-2…), assigned on first save and never repeated. Revisions add R1, R2.</p></div>
-      <button class="btn pri" id="btnNew">+ New quotation</button>
+      <div class="newbtns"><button class="btn pri" id="btnNew">+ New quotation</button><button class="btn" id="btnRenNew">+ Renders presentation</button></div>
     </div>
     <div class="folders" id="folders" role="tablist">
       <button data-folder="pending" class="on" role="tab">Pending <span id="cnt-pending"></span></button>
@@ -400,17 +453,63 @@ table.ctab{min-width:560px}
       <button data-folder="cancelled" role="tab">Cancelled <span id="cnt-cancelled"></span></button>
       <button data-folder="deleted" role="tab">Deleted <span id="cnt-deleted"></span></button>
       <button data-folder="all" role="tab">All <span id="cnt-all"></span></button>
+      <button data-folder="renders" role="tab" style="margin-left:auto">Renders <span id="cnt-renders"></span></button>
     </div>
     <div class="tools">
       <input id="fSearch" type="search" placeholder="Search quote no., client or project" aria-label="Search">
     </div>
-    <div class="tablebox"><table class="reg">
-      <thead><tr><th>Quote no.</th><th>Date</th><th>Client</th><th>Project</th><th class="r">Total incl. VAT (AED)</th><th>Status</th><th>Engineer</th><th>Last edited</th></tr></thead>
+    <div class="tablebox" id="qBox"><table class="reg">
+      <thead><tr><th>Quote no.</th><th>Date</th><th>Client</th><th>Project</th><th class="r">Total incl. VAT (AED)</th><th>Status</th><th>Assigned to</th><th>Last edited</th></tr></thead>
       <tbody id="regBody"></tbody>
     </table>
     <div class="empty" id="regEmpty">Loading quotations…</div></div>
     <div class="morerow"><button class="btn sm" id="btnMore" hidden>Show older quotations</button></div>
     <div class="foot-sum tn" id="regSum"></div>
+    <div id="renBox" hidden>
+      <div class="tablebox"><table class="reg">
+        <thead><tr><th>Project</th><th>Date</th><th>Pages</th><th>Renders</th><th>Last edited</th></tr></thead>
+        <tbody id="renBody"></tbody>
+      </table>
+      <div class="empty" id="renEmpty">Loading presentations…</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="vRen" hidden>
+  <div class="ebar"><div class="wrap">
+    <button class="btn ghost sm" id="rBack">← Register</button>
+    <span class="id" id="rId">Renders presentation</span>
+    <span class="dirty" id="rDirty" hidden>Unsaved changes</span>
+    <span class="sp"></span>
+    <button class="btn sm" id="rDel">Delete</button>
+    <button class="btn sm" id="rPrev">Preview PDF</button>
+    <button class="btn sm" id="rDl">Download PDF</button>
+    <button class="btn pri sm" id="rSave">Save</button>
+  </div></div>
+  <div class="wrap rn-grid">
+    <div>
+      <div class="card">
+        <h3>Details</h3>
+        <p>Printed on every render page.</p>
+        <div class="rn-row2"><div><label class="lab" for="rProj">Project title</label><input class="in" id="rProj" placeholder="e.g. VILLA 007"></div><div><label class="lab" for="rDate">Date</label><input class="in" id="rDate" placeholder="DD-MM-YYYY"></div></div>
+        <label class="lab" for="rDisc">Disclaimer</label>
+        <textarea class="in" id="rDisc" rows="5"></textarea>
+        <div class="rn-tg"><label><input type="checkbox" id="rCover"> BYLD cover page</label><label><input type="checkbox" id="rTitle"> Project title page</label><label><input type="checkbox" id="rThanks"> Thank-you page</label></div>
+      </div>
+      <div class="card">
+        <h3>Render photos <span class="sub-t" id="rCnt"></span></h3>
+        <div class="rn-drop" id="rDrop" role="button" tabindex="0"><b>Upload photos</b> or drop them here<br><span style="font-size:12.5px">JPG or PNG · each photo becomes one page, in this order</span><input type="file" id="rFile" accept="image/*" multiple hidden></div>
+        <div class="rn-list" id="rList"></div>
+      </div>
+    </div>
+    <div class="rn-prev">
+      <div class="card">
+        <h3>Page preview <span class="sub-t" id="rPgName"></span></h3>
+        <div id="rBig"></div>
+        <div class="rn-pages" id="rPages"></div>
+      </div>
+      <p class="rn-hint">Drag the ⠿ handle, or use ↑ ↓, to change the order. The PDF comes out A4 landscape, like these pages.</p>
+    </div>
   </div>
 </section>
 
@@ -419,7 +518,7 @@ table.ctab{min-width:560px}
     <button class="btn ghost sm" id="btnBack">← Register</button>
     <span class="id" id="eId">New quotation</span>
     <select id="eStatus" aria-label="Status"><option>Working</option><option>Sent</option><option>Approved</option><option>Rejected</option><option>Cancelled</option></select>
-    <input id="ePrep" placeholder="Engineer (not printed)" aria-label="Engineer responsible, shown in the register only" style="border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 8px;width:170px">
+    <input id="ePrep" list="peopleList" placeholder="Assigned to" title="Who this quotation is assigned to (shown in the register, not printed)" aria-label="Assigned to, shown in the register only" style="border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 8px;width:170px">
     <span class="dirty" id="eDirty" hidden>Unsaved changes</span>
     <span class="sp"></span>
     <button class="btn sm ok" id="btnApprove">Approve</button>
@@ -644,6 +743,7 @@ table.ctab{min-width:560px}
 <div class="scrim" id="scrim" hidden><div class="modal" role="dialog" aria-modal="true"><h3 id="mT"></h3><p id="mB"></p><div class="row" id="mR"></div></div></div>
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastUndo" hidden>Undo</button></div>
 <div class="umenu" id="umenu" hidden role="dialog" aria-label="Choose a unit"></div>
+<datalist id="peopleList"></datalist>
 
 <script src="firebase-config.js?v=3"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -856,6 +956,20 @@ async function firebaseStore() {
     },
     patchIndex: (id, data) => setDoc(doc(fs, "index", id), data, {merge: true}),
     setPresence: (uid, d) => setDoc(doc(fs, "presence", uid), {...d, at: F.serverTimestamp()}, {merge: true}),
+    newRenderId: () => doc(collection(fs, "renders")).id,
+    watchRenders: (cb, err) => onSnapshot(query(collection(fs, "renders"), orderBy("updatedAt", "desc"), limit(300)), s => cb(s.docs.map(d => ({id: d.id, ...d.data()}))), err),
+    async getRender(id) {
+      const m = await getDoc(doc(fs, "renders", id)); if (!m.exists()) return null;
+      const ps = await getDocs(collection(fs, "renders", id, "photos"));
+      return {main: m.data(), photos: Object.fromEntries(ps.docs.map(d => [d.id, d.data().data]))};
+    },
+    async saveRender(id, main, add, remove, onStep) {
+      let k = 0;
+      for (const p of add) { await setDoc(doc(fs, "renders", id, "photos", p.id), {data: p.data}); onStep?.(++k, add.length); }
+      for (const pid of remove) await F.deleteDoc(doc(fs, "renders", id, "photos", pid)).catch(() => {});
+      await setDoc(doc(fs, "renders", id), main);
+    },
+    async deleteRender(id, pids) { for (const pid of pids) await F.deleteDoc(doc(fs, "renders", id, "photos", pid)).catch(() => {}); await F.deleteDoc(doc(fs, "renders", id)); },
     getPresence: async uid => { const s = await getDoc(doc(fs, "presence", uid)); return s.exists() ? s.data() : null; },
     watchPresence: cb => onSnapshot(collection(fs, "presence"), s => cb(s.docs.map(d => { const x = d.data({serverTimestamps: "estimate"}); return {...x, uid: d.id, at: x.at?.toMillis ? x.at.toMillis() : 0}; })), () => {}),
     getPrivate: async id => { const s = await getDoc(doc(fs, "contracts", id)); return s.exists() ? s.data() : null; },
@@ -895,7 +1009,7 @@ async function firebaseStore() {
 
 /* ---------- data store: demo (in memory, for trying the site with ?demo) ---------- */
 function demoStore() {
-  const Q = new Map(), I = new Map(), S = new Map(), C = new Map(), P = new Map(), PR = new Map(), prs = new Set(), subs = new Set(), qsubs = new Map();
+  const Q = new Map(), I = new Map(), S = new Map(), C = new Map(), P = new Map(), PR = new Map(), prs = new Set(), RM = new Map(), RP = new Map(), rsubs = new Set(), subs = new Set(), qsubs = new Map();
   const fire = () => { subs.forEach(f => f()); };
   const fireQ = id => (qsubs.get(id) || []).forEach(f => f());
   const user = {email: ADMINS[0] || ("demo@" + DOMAIN), emailVerified: true, uid: "demo"};
@@ -920,6 +1034,11 @@ function demoStore() {
       Q.set(id, clone(data)); I.set(id, {...(I.get(id) || {}), ...summaryOf(data)}); fire(); fireQ(id); return clone(data);
     },
     patchIndex: async (id, d) => { I.set(id, {...(I.get(id) || {}), ...clone(d)}); fire(); },
+    newRenderId: () => "r" + Math.random().toString(36).slice(2, 12),
+    watchRenders(cb) { const f = () => cb([...RM.entries()].map(([id, d]) => ({id, ...clone(d)})).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))); rsubs.add(f); setTimeout(f, 20); return () => rsubs.delete(f); },
+    getRender: async id => RM.has(id) ? {main: clone(RM.get(id)), photos: Object.fromEntries(RP.get(id) || [])} : null,
+    async saveRender(id, main, add, remove, onStep) { const m = RP.get(id) || new Map(); add.forEach((p, i) => { m.set(p.id, p.data); onStep?.(i + 1, add.length); }); remove.forEach(pid => m.delete(pid)); RP.set(id, m); RM.set(id, clone(main)); rsubs.forEach(f => f()); },
+    async deleteRender(id) { RM.delete(id); RP.delete(id); rsubs.forEach(f => f()); },
     setPresence: async (uid, d) => { PR.set(uid, {...(PR.get(uid) || {}), ...clone(d), uid, at: Date.now()}); prs.forEach(f => f()); },
     getPresence: async uid => PR.has(uid) ? clone(PR.get(uid)) : (uid === "demo" ? {name: "Accounts"} : null),
     watchPresence(cb) { const f = () => cb([...PR.values()].map(clone)); prs.add(f); setTimeout(f, 20); return () => prs.delete(f); },
@@ -943,7 +1062,7 @@ function demoStore() {
 }
 
 /* ---------- register ---------- */
-function show(view) { view = {list: "vList", edit: "vEdit"}[view] || view; ["vAuth","vList","vEdit","vSet","vCon","vCert","vHand"].forEach(v => $(v).hidden = v !== view); queueMicrotask(() => presenceTick()); window.scrollTo(0,0); if (view === "vEdit") requestAnimationFrame(sizeAll); }
+function show(view) { view = {list: "vList", edit: "vEdit"}[view] || view; ["vAuth","vList","vEdit","vSet","vCon","vCert","vHand","vRen"].forEach(v => $(v).hidden = v !== view); queueMicrotask(() => presenceTick()); window.scrollTo(0,0); if (view === "vEdit") requestAnimationFrame(sizeAll); }
 function startIndex() {
   if (stopIndex) stopIndex();
   stopIndex = store.watchIndex(indexLimit, rows => {
@@ -1008,6 +1127,23 @@ function startPresence() {
     if (!$("vList").hidden) renderList(); else if (!$("vEdit").hidden) renderAlerts();
   });
 }
+function fillPeople() {
+  const names = new Set(); people.forEach(p => { if (p.name) names.add(p.name); }); index.forEach(d => { if (d.engineer) names.add(d.engineer); });
+  if (me?.name) names.add(me.name);
+  $("peopleList").innerHTML = [...names].sort((a, b) => a.localeCompare(b)).map(n => `<option value="${esc(n)}">`).join("");
+}
+function askAssignee(current) {
+  fillPeople();
+  return new Promise(res => {
+    $("mT").textContent = "Who is this quotation assigned to?";
+    $("mB").innerHTML = `Pick a name or type a new one. It shows in the register under “Assigned to” and can be changed later.<input class="in" id="asIn" list="peopleList" maxlength="60" autocomplete="off" placeholder="Name">`;
+    $("mR").innerHTML = `<button class="btn" data-k="cancel">Cancel</button><button class="btn pri" data-k="ok">Continue</button>`;
+    $("scrim").hidden = false; const i = $("asIn"); i.value = current || ""; i.focus(); i.select();
+    const done = k => { const v = i.value.trim().replace(/\s+/g, " "); if (k === "ok" && !v) { i.placeholder = "Enter a name first"; i.focus(); return; } $("scrim").hidden = true; res(k === "ok" ? v : null); };
+    i.onkeydown = e => { if (e.key === "Enter") done("ok"); if (e.key === "Escape") done("cancel"); };
+    $("mR").onclick = e => { const k = e.target.closest("[data-k]")?.dataset.k; if (k) done(k); };
+  });
+}
 async function askName(first) {
   return new Promise(res => {
     $("mT").textContent = first ? "What's your name?" : "Change your name";
@@ -1032,6 +1168,10 @@ function renderList() {
   FOLDERS.forEach(f => cnt[f] = all0.filter(d => inFolder(d, f)).length);
   FOLDERS.forEach(f => { const e = $("cnt-" + f); if (e) e.textContent = cnt[f] ? cnt[f] + (indexMore ? "+" : "") : ""; });
   document.querySelectorAll("#folders button").forEach(b => b.classList.toggle("on", b.dataset.folder === folder));
+  const isR = folder === "renders";
+  document.querySelector("#vList .tools").hidden = isR; $("qBox").hidden = isR;
+  $("btnMore").parentElement.hidden = isR; $("regSum").hidden = isR; $("renBox").hidden = !isR;
+  if (isR) { startRenders(); renderRenList(); return; }
   const rows = all0
     .filter(d => inFolder(d, folder) && (!s || [d.number, d.clientName, d.projectName, d.customerId, d.location].join(" ").toLowerCase().includes(s)))
     .sort((a,b) => (b.date||"").localeCompare(a.date||"") || (b.seq||0) - (a.seq||0));
@@ -1353,6 +1493,7 @@ $("alerts").addEventListener("click", async e => {
 });
 $("eStatus").onchange = e => { cur.status = e.target.value; markDirty(); };
 $("ePrep").oninput = e => { cur.preparedBy = e.target.value; markDirty(); };
+$("ePrep").onfocus = fillPeople;
 
 /* ---------- navigation ---------- */
 async function leaveOk() {
@@ -1383,9 +1524,10 @@ async function openQuote(id, force) {
   try { const d = await store.getQuote(id); if (!d) { toast("That quotation isn't in the register."); return; } loadIntoEditor(d, id); }
   catch (err) { toast(fbMsg(err, "Couldn't open that quotation.")); }
 }
-$("btnNew").onclick = () => {
+$("btnNew").onclick = async () => {
+  const who = await askAssignee(""); if (!who) return;
   if (stopQuote) { stopQuote(); stopQuote = null; }
-  cur = blankQuote(); cur.preparedBy = me?.name || ""; curId = null; dirty = false; baseUpdatedAt = null; savedStatus = null; savedRev = 0;
+  cur = blankQuote(); cur.preparedBy = who; curId = null; dirty = false; baseUpdatedAt = null; savedStatus = null; savedRev = 0;
   ackProject = false; remoteChanged = false; dupState = {client: [], project: []}; nextNo = ""; nextCust = "";
   renderEditor(); show("edit"); $("cName").focus(); refreshNext();
 };
@@ -1402,6 +1544,7 @@ document.addEventListener("keydown", e => {
 /* ---------- validation & save ---------- */
 function validate() {
   const q = cur, errs = [];
+  if (!(q.preparedBy || "").trim()) errs.push("Choose who this quotation is assigned to (box at the top, next to the status).");
   if (!q.client.name.trim()) errs.push("Enter the client name.");
   if (!q.project.name.trim()) errs.push("Enter the project name.");
   if (!q.date) errs.push("Enter the quotation date.");
@@ -1490,10 +1633,11 @@ $("btnRev").onclick = async () => {
 };
 $("btnDup").onclick = async () => {
   if (!(await leaveOk())) return;
+  const who = await askAssignee(cur.preparedBy || ""); if (!who) return;
   if (stopQuote) { stopQuote(); stopQuote = null; }
   const c = clone(cur), d = todayISO();
   Object.assign(c, {number:"", seq:0, rev:0, status:"Working", date:d, validUntil:addDays(d, num(defaults.validityDays)||7), customerId:"",
-    createdAt:null, createdBy:null, createdByName:null, updatedAt:null, updatedBy:null, updatedByName:null, alertSentRev:null, preparedBy: me?.name || c.preparedBy});
+    createdAt:null, createdBy:null, createdByName:null, updatedAt:null, updatedBy:null, updatedByName:null, alertSentRev:null, preparedBy: who});
   delete c.contract; delete c.certificate; delete c.handover;
   c.client = {name:"",phone:"",email:"",trn:""}; c.project = {name:"",location:c.project.location,street:"",villa:"",phone:""};
   nextNo = ""; nextCust = ""; cur = c; curId = null; dirty = true; baseUpdatedAt = null; savedStatus = null; savedRev = 0; ackProject = false; remoteChanged = false; dupState = {client:[], project:[]};
@@ -1699,12 +1843,14 @@ function loadPdfjs() {
   return pdfjsReady;
 }
 async function openPreview() {
-  if (!cur) return;
+  if (!cur && pvMode !== "renders") return;
   $("pv").hidden = false; document.body.style.overflow = "hidden";
-  $("pvTitle").textContent = pvMode === "hand" ? `Handover preview · ${label(cur)}` : pvMode === "cert" ? `Certificate preview · ${label(cur)}` : pvMode === "contract" ? `Contract preview · ${label(cur)}` : `Print preview · ${cur.number ? label(cur) : (nextNo || "New quotation")}`;
+  if (pvMode === "renders") { $("pv").hidden = false; document.body.style.overflow = "hidden"; }
+  else if (!cur) return;
+  $("pvTitle").textContent = pvMode === "renders" ? `Renders preview · ${ren?.project || ""}` : pvMode === "hand" ? `Handover preview · ${label(cur)}` : pvMode === "cert" ? `Certificate preview · ${label(cur)}` : pvMode === "contract" ? `Contract preview · ${label(cur)}` : `Print preview · ${cur.number ? label(cur) : (nextNo || "New quotation")}`;
   const box = $("pvPages"); box.innerHTML = `<div class="pv-msg">Laying out A4 pages…</div>`;
   try {
-    const data = pvMode === "hand" ? buildHandoverPdf({...cur, handover: ho || cur.handover}, {type:"arraybuffer"}) : pvMode === "cert" ? buildCertPdf({...cur, certificate: cert || cur.certificate}, {type:"arraybuffer"}) : pvMode === "contract" ? buildContractPdf({...cur, contract: con || cur.contract}, {type:"arraybuffer"}) : buildPdf(cur, {type:"arraybuffer"});
+    const data = pvMode === "renders" ? await buildRendersPdf(ren, {type:"arraybuffer"}) : pvMode === "hand" ? buildHandoverPdf({...cur, handover: ho || cur.handover}, {type:"arraybuffer"}) : pvMode === "cert" ? buildCertPdf({...cur, certificate: cert || cur.certificate}, {type:"arraybuffer"}) : pvMode === "contract" ? buildContractPdf({...cur, contract: con || cur.contract}, {type:"arraybuffer"}) : buildPdf(cur, {type:"arraybuffer"});
     const lib = await loadPdfjs();
     const pdf = await lib.getDocument({data: new Uint8Array(data)}).promise;
     box.innerHTML = "";
@@ -1818,7 +1964,7 @@ async function sendConfirmAlert(q, test) {
     quote_number: label(q), quote_date: fmtD(q.date), client_name: q.client?.name || "", customer_id: q.customerId || "",
     project_name: q.project?.name || "", project_location: q.project?.location || "",
     total_ex_vat: "AED " + fmt(T.ex), vat: "AED " + fmt(T.vat), total: "AED " + fmt(T.inc),
-    engineer: q.preparedBy || "", confirmed_by: me?.email || "", dropbox_file: x?.path || pdfFileName(q), site_link: SITE_URL
+    engineer: q.preparedBy || "", assigned_to: q.preparedBy || "", confirmed_by: me?.email || "", dropbox_file: x?.path || pdfFileName(q), site_link: SITE_URL
   };
   await ej.send(e.serviceId, e.templateId, params, {publicKey: e.publicKey});
 }
@@ -2526,11 +2672,13 @@ async function ensureSaved() {
   if (k !== "save") return false; closePreview(); return save();
 }
 $("pvDl").onclick = async () => {
+  if (pvMode === "renders") { await renDownload(); return; }
   if (pvMode === "hand") { if (!(await hoReady())) return; saveBlob(buildHandoverPdf(cur), hoFileName(cur)); toast("Handover certificate downloaded"); return; }
   if (pvMode === "cert") { if (!(await certReady())) return; saveBlob(buildCertPdf(cur), certFileName(cur)); toast("Completion certificate downloaded"); return; }
   if (pvMode === "contract") { if (!(await contractReady())) return; saveBlob(buildContractPdf(cur), contractFileName(cur)); toast("Contract PDF downloaded"); return; }
   if (!(await ensureSaved())) return; saveBlob(buildPdf(cur), pdfName(cur)); toast("PDF downloaded. Print it on A4 at 100% (actual size)."); };
 $("pvPrint").onclick = async () => {
+  if (pvMode === "renders") { const b = await buildRendersPdf(ren); const url = URL.createObjectURL(b), w = window.open(url, "_blank"); if (!w) saveBlob(b, renFileName(ren)); setTimeout(() => URL.revokeObjectURL(url), 120000); return; }
   const isC = pvMode === "contract", isK = pvMode === "cert", isH = pvMode === "hand";
   if (!(isH ? await hoReady() : isK ? await certReady() : isC ? await contractReady() : await ensureSaved())) return;
   const make = () => isH ? buildHandoverPdf(cur) : isK ? buildCertPdf(cur) : isC ? buildContractPdf(cur) : buildPdf(cur), nm = isH ? hoFileName(cur) : isK ? certFileName(cur) : isC ? contractFileName(cur) : pdfName(cur);
@@ -2539,10 +2687,219 @@ $("pvPrint").onclick = async () => {
   setTimeout(() => URL.revokeObjectURL(url), 120000);
 };
 
+
+/* ---------- renders presentation ---------- */
+const REN_DISC = "This render is provided for presentation purposes only and remains the intellectual property of BYLD Technical Services. It shall not be reproduced, shared with, issued to, or used by any third-party contractor, consultant, supplier, or other party for pricing, execution, construction, or any commercial purpose without prior written authorization and full payment of the applicable design / rendering fees.";
+let renList = [], stopRen = null, renLoaded = false, ren = null, renDirty = false, renSelPage = null, renBusy = false, renDrag = null;
+const dmy = iso => { const [y, m, d] = (iso || todayISO()).split("-"); return `${d}-${m}-${y}`; };
+const renFileName = r => `Renders - ${r?.project || "Presentation"}.pdf`.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
+function startRenders() {
+  if (stopRen) return;
+  stopRen = store.watchRenders(rows => { renList = rows; renLoaded = true; $("cnt-renders").textContent = rows.length || ""; if (folder === "renders" && !$("vList").hidden) renderRenList(); },
+    err => { $("renEmpty").hidden = false; $("renEmpty").textContent = fbMsg(err, "Couldn't load the presentations."); });
+}
+function renderRenList() {
+  $("renBody").innerHTML = renList.map(r => `<tr data-rid="${esc(r.id)}" tabindex="0">
+    <td><span class="qno">${esc(r.project || "Untitled")}</span><div class="sub-t">${esc([...new Set(Object.values(r.titles || {}).filter(Boolean).map(t => titleCase(String(t).toLowerCase())))].slice(0, 4).join(", "))}</div></td>
+    <td class="tn">${esc(r.date || "")}</td>
+    <td class="tn">${r.pages || 0}</td>
+    <td><div class="rn-thumbs">${(r.thumbs || []).map(t => `<img src="${t}" alt="">`).join("")}</div></td>
+    <td>${r.updatedBy ? `${esc(nameFor(r.updatedBy, r.updatedByName))}<div class="sub-t">${esc(fmtWhen(r.updatedAt))}</div>` : ""}</td></tr>`).join("");
+  $("renEmpty").hidden = renList.length > 0;
+  $("renEmpty").textContent = !renLoaded ? "Loading presentations…" : "No renders presentations yet. Use “+ Renders presentation” to make the first one.";
+}
+$("renBody").addEventListener("click", e => { const r = e.target.closest("tr[data-rid]"); if (r) openRender(r.dataset.rid); });
+$("renBody").addEventListener("keydown", e => { if (e.key === "Enter") { const r = e.target.closest("tr[data-rid]"); if (r) openRender(r.dataset.rid); } });
+
+function loadImg(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+/* shrink a photo so it fits the database (one photo per record, under ~0.9 MB) and still prints sharp on A4 */
+async function compressPhoto(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const im = await loadImg(url); let max = 2200, q = 0.86, out = "";
+    for (let tries = 0; tries < 8; tries++) {
+      const k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.round(im.naturalWidth * k), h = Math.round(im.naturalHeight * k);
+      const c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.drawImage(im, 0, 0, w, h);
+      out = c.toDataURL("image/jpeg", q); if (out.length < 900000) return out;
+      if (q > 0.7) q -= 0.08; else max = Math.round(max * 0.85);
+    }
+    return out;
+  } finally { URL.revokeObjectURL(url); }
+}
+async function thumbOf(src, w = 160) { const im = await loadImg(src); const h = Math.round(w * 2 / 3), c = document.createElement("canvas"); c.width = w; c.height = h; coverDraw(c.getContext("2d"), im, w, h); return c.toDataURL("image/jpeg", 0.7); }
+function coverDraw(g, im, w, h) { const r = Math.max(w / im.naturalWidth, h / im.naturalHeight), sw = w / r, sh = h / r; g.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - sh) / 2, sw, sh, 0, 0, w, h); }
+
+function newRen() { return {id: null, project: "", date: dmy(todayISO()), disclaimer: REN_DISC, cover: true, titlePage: true, thanks: true, photos: [], orig: [], createdAt: null, createdBy: null, createdByName: null}; }
+function renPages(r) {
+  const L = [];
+  if (r.cover) L.push({kind: "cover", cap: "Cover"});
+  if (r.titlePage) L.push({kind: "title", cap: "Title"});
+  r.photos.forEach((p, i) => L.push({kind: "photo", p, i, cap: `${i + 1} · ${p.title || "No title"}`}));
+  if (r.thanks) L.push({kind: "thanks", cap: "Thank you"});
+  return L;
+}
+const markSVG = () => `<svg viewBox="0 0 ${MARKV.w} ${MARKV.h}"><path class="ink" fill-rule="evenodd" d="${svgD(MARKV)}"/></svg>`;
+function slideHTML(x) {
+  if (x.kind === "cover") return `<div class="rn-slide cover">${logoSVG()}</div>`;
+  if (x.kind === "title") return `<div class="rn-slide title"><span class="a">${esc((ren.project || "PROJECT").toUpperCase())}</span><i class="l"></i><span class="b">RENDERS</span></div>`;
+  if (x.kind === "thanks") return `<div class="rn-slide thanks"><b>THANK YOU</b>${markSVG()}</div>`;
+  return `<div class="rn-slide"><div class="rn-tb"><div class="dt"><b>Drawing title:</b><span>${esc((x.p.title || "").toUpperCase())}</span></div>
+    <div class="mid"><div><span>Project title :</span><span>${esc(ren.project)}</span></div><div><span>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span><span>${esc(ren.date)}</span></div></div>
+    <div class="disc"><div class="t">Disclaimer :</div>${esc(ren.disclaimer)}</div></div><div class="ph" style="background-image:url('${x.p.src}')"></div></div>`;
+}
+function renMark() { renDirty = true; $("rDirty").hidden = false; }
+function renPick(i) { const L = renPages(ren); renSelPage = L.findIndex(x => x.kind === "photo" && x.i === i); }
+function renRenderPreview() {
+  const L = renPages(ren); if (renSelPage == null || renSelPage >= L.length || renSelPage < 0) { renSelPage = L.findIndex(x => x.kind === "photo"); if (renSelPage < 0) renSelPage = 0; }
+  const c = L[renSelPage];
+  $("rBig").innerHTML = c ? slideHTML(c) : "";
+  $("rPgName").textContent = L.length ? `· page ${renSelPage + 1} of ${L.length}` : "";
+  $("rPages").innerHTML = L.map((x, i) => `<div class="pg ${i === renSelPage ? "sel" : ""}" data-i="${i}">${slideHTML(x)}<div class="rn-cap">${esc(x.cap)}</div></div>`).join("");
+  $("rId").textContent = ren.project ? `Renders · ${ren.project}` : "New renders presentation";
+}
+function renRenderList() {
+  const selI = renPages(ren)[renSelPage]?.i;
+  $("rCnt").textContent = `· ${ren.photos.length} photo${ren.photos.length === 1 ? "" : "s"}`;
+  $("rList").innerHTML = ren.photos.map((p, i) => `<div class="rn-item ${i === selI ? "sel" : ""}" draggable="true" data-id="${esc(p.id)}">
+    <span class="h" title="Drag to reorder">⠿</span><span class="n">${i + 1}</span><img src="${p.src}" alt="">
+    <input value="${esc(p.title)}" placeholder="Drawing title, e.g. KITCHEN" aria-label="Drawing title">
+    <span class="ar"><button class="rn-ib" data-a="up" title="Move up" aria-label="Move up">↑</button><button class="rn-ib" data-a="down" title="Move down" aria-label="Move down">↓</button><button class="rn-ib x" data-a="del" title="Remove" aria-label="Remove">✕</button></span></div>`).join("");
+}
+function renFill() {
+  $("rProj").value = ren.project; $("rDate").value = ren.date; $("rDisc").value = ren.disclaimer;
+  $("rCover").checked = ren.cover; $("rTitle").checked = ren.titlePage; $("rThanks").checked = ren.thanks;
+  $("rDel").hidden = !ren.id; renDirty = false; $("rDirty").hidden = true; renSelPage = null;
+  renRenderPreview(); renRenderList();
+}
+async function renLeaveOk() { if (!renDirty) return true; return (await ask("Discard unsaved changes?", "You have changes on this presentation that haven't been saved.", [{k:"stay",t:"Keep editing"},{k:"go",t:"Discard changes",pri:true}])) === "go"; }
+$("btnRenNew").onclick = () => { ren = newRen(); renFill(); show("vRen"); $("rProj").focus(); };
+async function openRender(id) {
+  toast("Opening presentation…");
+  try {
+    const r = await store.getRender(id); if (!r) { toast("That presentation isn't there any more."); return; }
+    const m = r.main, order = (m.order || []).filter(pid => r.photos[pid]);
+    ren = {id, project: m.project || "", date: m.date || "", disclaimer: m.disclaimer ?? REN_DISC, cover: m.cover !== false, titlePage: m.titlePage !== false, thanks: m.thanks !== false,
+      photos: order.map(pid => ({id: pid, title: m.titles?.[pid] || "", src: r.photos[pid], isNew: false})), orig: Object.keys(r.photos),
+      createdAt: m.createdAt || null, createdBy: m.createdBy || null, createdByName: m.createdByName || null};
+    renFill(); show("vRen");
+  } catch (err) { toast(fbMsg(err, "Couldn't open that presentation.")); }
+}
+$("rBack").onclick = async () => { if (!(await renLeaveOk())) return; renDirty = false; ren = null; folder = "renders"; renderList(); show("list"); };
+[["rProj", "project"], ["rDate", "date"], ["rDisc", "disclaimer"]].forEach(([id, k]) => $(id).addEventListener("input", e => { ren[k] = e.target.value; renMark(); renRenderPreview(); }));
+[["rCover", "cover"], ["rTitle", "titlePage"], ["rThanks", "thanks"]].forEach(([id, k]) => $(id).addEventListener("change", e => { ren[k] = e.target.checked; renMark(); renSelPage = null; renRenderPreview(); renRenderList(); }));
+$("rPages").onclick = e => { const g = e.target.closest(".pg"); if (!g) return; renSelPage = +g.dataset.i; renRenderPreview(); renRenderList(); };
+$("rList").addEventListener("click", e => {
+  const it = e.target.closest(".rn-item"); if (!it) return; const i = ren.photos.findIndex(p => p.id === it.dataset.id), P = ren.photos;
+  const a = e.target.closest("[data-a]")?.dataset.a;
+  if (a === "up" && i > 0) { [P[i - 1], P[i]] = [P[i], P[i - 1]]; renMark(); renPick(i - 1); }
+  else if (a === "down" && i < P.length - 1) { [P[i + 1], P[i]] = [P[i], P[i + 1]]; renMark(); renPick(i + 1); }
+  else if (a === "del") { P.splice(i, 1); renMark(); renPick(Math.min(i, P.length - 1)); }
+  else if (e.target.tagName === "INPUT") { renPick(i); renRenderPreview(); document.querySelectorAll("#rList .rn-item").forEach((x, k) => x.classList.toggle("sel", k === i)); return; }
+  else renPick(i);
+  renRenderList(); renRenderPreview();
+});
+$("rList").addEventListener("input", e => { if (e.target.tagName !== "INPUT") return; const p = ren.photos.find(p => p.id === e.target.closest(".rn-item").dataset.id); p.title = e.target.value; renMark(); renRenderPreview(); });
+$("rList").addEventListener("dragstart", e => { const it = e.target.closest(".rn-item"); if (!it || e.target.tagName === "INPUT") return; renDrag = it.dataset.id; it.classList.add("drag"); e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", renDrag); } catch {} });
+$("rList").addEventListener("dragend", () => { renDrag = null; renRenderList(); renRenderPreview(); });
+$("rList").addEventListener("dragover", e => {
+  if (!renDrag) return; e.preventDefault(); const it = e.target.closest(".rn-item"); if (!it || it.dataset.id === renDrag) return;
+  const from = ren.photos.findIndex(p => p.id === renDrag), r = it.getBoundingClientRect(), after = e.clientY > r.top + r.height / 2;
+  const [m] = ren.photos.splice(from, 1); const ni = ren.photos.findIndex(p => p.id === it.dataset.id) + (after ? 1 : 0); ren.photos.splice(ni, 0, m);
+  if (from !== ni) { renMark(); renPick(ni); renRenderList(); document.querySelector(`#rList .rn-item[data-id="${renDrag}"]`)?.classList.add("drag"); renRenderPreview(); }
+});
+async function renAddFiles(files) {
+  const list = [...files].filter(f => f.type.startsWith("image/")); if (!list.length) return;
+  toast(`Adding ${list.length} photo${list.length > 1 ? "s" : ""}…`);
+  for (const f of list) {
+    try { const src = await compressPhoto(f); ren.photos.push({id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), title: "", src, isNew: true}); renMark(); renPick(ren.photos.length - 1); renRenderList(); renRenderPreview(); }
+    catch { toast(`Couldn't read ${f.name}. Use a JPG or PNG.`); }
+  }
+}
+$("rDrop").onclick = () => $("rFile").click(); $("rDrop").onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("rFile").click(); } };
+$("rFile").onchange = e => { renAddFiles(e.target.files); e.target.value = ""; };
+$("rDrop").addEventListener("dragover", e => { if (renDrag) return; e.preventDefault(); $("rDrop").classList.add("over"); });
+$("rDrop").addEventListener("dragleave", () => $("rDrop").classList.remove("over"));
+$("rDrop").addEventListener("drop", e => { e.preventDefault(); $("rDrop").classList.remove("over"); renAddFiles(e.dataTransfer.files); });
+
+$("rSave").onclick = () => renSave();
+async function renSave() {
+  if (renBusy || !ren) return false;
+  if (!ren.project.trim()) { toast("Enter the project title first."); $("rProj").focus(); return false; }
+  if (!ren.photos.length) { toast("Upload at least one photo."); return false; }
+  renBusy = true; $("rSave").disabled = true; $("rSave").textContent = "Saving…";
+  try {
+    if (!ren.id) ren.id = store.newRenderId();
+    const now = new Date().toISOString(), keep = new Set(ren.photos.map(p => p.id));
+    const add = ren.photos.filter(p => p.isNew).map(p => ({id: p.id, data: p.src})), remove = ren.orig.filter(pid => !keep.has(pid));
+    const thumbs = []; for (const p of ren.photos.slice(0, 4)) thumbs.push(await thumbOf(p.src));
+    const main = {project: ren.project.trim(), date: ren.date.trim(), disclaimer: ren.disclaimer, cover: ren.cover, titlePage: ren.titlePage, thanks: ren.thanks,
+      order: ren.photos.map(p => p.id), titles: Object.fromEntries(ren.photos.map(p => [p.id, p.title.trim()])), pages: renPages(ren).length, photoCount: ren.photos.length, thumbs,
+      createdAt: ren.createdAt || now, createdBy: ren.createdBy || me.email, createdByName: ren.createdByName || me.name || "", updatedAt: now, updatedBy: me.email, updatedByName: me.name || ""};
+    await store.saveRender(ren.id, main, add, remove, (k, n) => { if (n > 1) $("rSave").textContent = `Saving ${k}/${n}…`; });
+    ren.photos.forEach(p => p.isNew = false); ren.orig = [...keep]; ren.createdAt = main.createdAt; ren.createdBy = main.createdBy; ren.createdByName = main.createdByName;
+    renDirty = false; $("rDirty").hidden = true; $("rDel").hidden = false; startRenders(); toast("Presentation saved"); return true;
+  } catch (err) { toast(fbMsg(err, "Save failed. Check your connection and try again.")); return false; }
+  finally { renBusy = false; $("rSave").disabled = false; $("rSave").textContent = "Save"; }
+}
+$("rDel").onclick = async () => {
+  if (!ren?.id) return;
+  const k = await ask("Delete this presentation?", `“${ren.project || "Untitled"}” and its ${ren.orig.length} photo${ren.orig.length === 1 ? "" : "s"} will be removed for everyone. This can't be undone.`, [{k:"cancel",t:"Cancel"},{k:"del",t:"Delete",pri:true}]);
+  if (k !== "del") return;
+  try { await store.deleteRender(ren.id, ren.orig); renDirty = false; ren = null; folder = "renders"; renderList(); show("list"); toast("Presentation deleted"); }
+  catch (err) { toast(fbMsg(err, "Couldn't delete it.")); }
+};
+$("rPrev").onclick = () => { if (!ren.photos.length && !ren.cover) { toast("Upload photos first."); return; } pvMode = "renders"; openPreview(); };
+$("rDl").onclick = () => renDownload();
+async function renDownload() { if (!ren) return; if (!ren.photos.length) { toast("Upload photos first."); return; } toast("Making the PDF…"); saveBlob(await buildRendersPdf(ren), renFileName(ren)); toast("PDF downloaded"); }
+
+/* A4 landscape PDF in the same layout as BYLD's renders presentation */
+async function buildRendersPdf(r, opts = {}) {
+  const {jsPDF} = window.jspdf; const doc = new jsPDF({unit: "mm", format: "a4", orientation: "landscape", compress: true});
+  doc.addFileToVFS("cg-m.ttf", CG_M); doc.addFont("cg-m.ttf", "CG", "medium");
+  doc.addFileToVFS("cg-l.ttf", CG_L); doc.addFont("cg-l.ttf", "CG", "light");
+  const W = 297, H = 210, CREAM = [248, 246, 238], NAVY = [31, 42, 68];
+  const L = renPages(r); let first = true;
+  for (const x of L) {
+    if (!first) doc.addPage("a4", "landscape"); first = false;
+    doc.setFillColor(...BRAND); doc.rect(0, 0, W, H, "F");
+    if (x.kind === "cover") { const w = 94; vecPDF(doc, LOGO, (W - w) / 2, (H - w * LOGO.h / LOGO.w) / 2, w, CREAM); continue; }
+    if (x.kind === "title") {
+      doc.setTextColor(...CREAM); doc.setFont("CG", "light"); doc.setFontSize(28);
+      doc.text((r.project || "").toUpperCase(), W * 0.415, H / 2 + 3.4, {align: "right"}); doc.text("RENDERS", W * 0.572, H / 2 + 3.4);
+      doc.setDrawColor(...CREAM); doc.setLineWidth(0.3); doc.line(W / 2, H * 0.36, W / 2, H * 0.64); continue;
+    }
+    if (x.kind === "thanks") {
+      doc.setTextColor(...CREAM); doc.setFont("CG", "light"); doc.setFontSize(53); doc.text("THANK YOU", W / 2, H / 2 + 6.5, {align: "center"});
+      const mw = 12.2; vecPDF(doc, MARKV, (W - mw) / 2, H - H * 0.016 - mw * MARKV.h / MARKV.w, mw, CREAM); continue;
+    }
+    /* title block */
+    const TH = 28.6, x1 = 51.4, x2 = 138.7;
+    doc.setFillColor(242, 242, 242); doc.rect(0, 0, W, TH, "F");
+    doc.setDrawColor(...NAVY); doc.setLineWidth(0.35); doc.rect(0.2, 0.2, W - 0.4, TH - 0.2); doc.line(x1, 0, x1, TH); doc.line(x2, 0, x2, TH); doc.line(x1, TH / 2, x2, TH / 2);
+    doc.setTextColor(17, 17, 17); doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+    doc.text("Drawing title:", 3, 6.5); const lw = doc.getTextWidth("Drawing title:") + 2.5;
+    doc.text(doc.splitTextToSize((x.p.title || "").toUpperCase(), x1 - 3 - lw - 2).slice(0, 4), 3 + lw, 6.5, {lineHeightFactor: 1.25});
+    doc.text("Project title :", x1 + 4, 6.5); doc.text(doc.splitTextToSize(r.project || "", x2 - x1 - 36)[0] || "", x1 + 33, 6.5);
+    doc.text("Date", x1 + 4, TH / 2 + 8); doc.text(":", x1 + 25, TH / 2 + 8); doc.text(r.date || "", x1 + 33, TH / 2 + 8);
+    doc.text("Disclaimer :", x2 + 3, 5.6);
+    let fs = 8, lines; const dw = W - x2 - 6;
+    for (;;) { doc.setFontSize(fs); lines = doc.splitTextToSize(r.disclaimer || "", dw); if (lines.length * fs * 0.3528 * 1.2 <= TH - 9.5 || fs <= 5.5) break; fs -= 0.25; }
+    doc.text(lines, x2 + 3, 9.7, {lineHeightFactor: 1.2});
+    /* photo, cropped to fill the frame */
+    const bx = W * 0.067, by = H * 0.157, bw = W * (1 - 0.067 - 0.066), bh = H * (1 - 0.157 - 0.024);
+    try {
+      const im = await loadImg(x.p.src), pxW = Math.min(2400, im.naturalWidth), pxH = Math.round(pxW * bh / bw);
+      const c = document.createElement("canvas"); c.width = pxW; c.height = pxH; coverDraw(c.getContext("2d"), im, pxW, pxH);
+      doc.addImage(c.toDataURL("image/jpeg", 0.9), "JPEG", bx, by, bw, bh, undefined, "FAST");
+    } catch { doc.setFillColor(11, 42, 45); doc.rect(bx, by, bw, bh, "F"); }
+  }
+  return opts.raw ? doc : doc.output(opts.type || "blob");
+}
+
 /* ---------- boot ---------- */
 $("topLogo").innerHTML = logoSVG();
 if ("serviceWorker" in navigator && !DEMO && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
-window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+window.addEventListener("beforeunload", e => { if (dirty || renDirty) { e.preventDefault(); e.returnValue = ""; } });
 function onUser(u) {
   if (!u) { if (stopIndex) { stopIndex(); stopIndex = null; } $("aEmail").value = recalled(); authView("aStart"); return; }
   if (!allowedEmail(u.email)) { $("aDeniedEmail").textContent = u.email; authView("aDenied"); return; }
