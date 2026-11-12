@@ -191,6 +191,12 @@ tr.add td{border:0;padding:5px 0 12px}
 tr.sec .x,tr.note .x{color:rgba(255,255,255,.65)}
 tr.sec .x:hover{background:rgba(255,255,255,.12);color:#fff}
 .mv{display:flex;flex-direction:column}
+.sec-t{display:flex;align-items:center;gap:4px}
+.sec-t .ed{flex:1;min-width:0}
+.sec-t .x.dup{width:34px;min-height:30px;flex:none;font-size:16px;border-radius:4px}
+tbody.flash td{animation:secflash 1.8s ease}
+@keyframes secflash{0%,35%{background-color:#FFF1C2;color:#1c1c1c}}
+.btn:disabled{opacity:.45;cursor:default}
 .mv .x{min-height:15px;font-size:10px}
 .mv .x:hover{color:var(--s-brand);background:var(--s-hover)}
 .add-btn{border:1px dashed var(--s-line);background:transparent;color:var(--s-brand);font:500 12.5px/1 var(--f-head);padding:6px 11px;border-radius:4px;cursor:pointer}
@@ -521,6 +527,8 @@ table.ctab{min-width:560px}
     <input id="ePrep" list="peopleList" placeholder="Assigned to" title="Who this quotation is assigned to (shown in the register, not printed)" aria-label="Assigned to, shown in the register only" style="border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 8px;width:170px">
     <span class="dirty" id="eDirty" hidden>Unsaved changes</span>
     <span class="sp"></span>
+    <button class="btn sm" id="btnUndo" title="Undo (Ctrl+Z)" disabled>↶ Undo</button>
+    <button class="btn sm" id="btnRedo" title="Redo (Ctrl+Y)" disabled>↷ Redo</button>
     <button class="btn sm ok" id="btnApprove">Approve</button>
     <button class="btn sm no" id="btnReject">Reject</button>
     <button class="btn sm pri" id="btnContract" hidden>Contract</button>
@@ -1244,8 +1252,8 @@ function renderEditor() {
       <td class="c-t amt tn" id="amt-${si}-${ii}"></td>
       <td class="c-x"><div class="mv"><button class="x" data-a="upItem" aria-label="Move item up" title="Move up">▲</button><button class="x" data-a="downItem" aria-label="Move item down" title="Move down">▼</button></div></td>
       <td class="c-x"><button class="x" data-a="delItem" aria-label="Remove item" title="Remove item">✕</button></td></tr>`).join("");
-    return `<tbody data-s="${si}">
-      <tr class="sec" data-s="${si}"><td class="c-sn">${letter(si)}</td><td colspan="5"><input class="ed" data-f="title" value="${esc(s.title)}" placeholder="Section title, e.g. Demolition works" aria-label="Section title"></td>
+    return `<tbody data-s="${si}"${si === flashSec ? ' class="flash"' : ""}>
+      <tr class="sec" data-s="${si}"><td class="c-sn">${letter(si)}</td><td colspan="5"><div class="sec-t"><input class="ed" data-f="title" value="${esc(s.title)}" placeholder="Section title, e.g. Demolition works" aria-label="Section title"><button class="x dup" data-a="dupSec" aria-label="Duplicate section" title="Duplicate section (copies all its items)">⧉</button></div></td>
         <td class="c-x"><div class="mv"><button class="x" data-a="upSec" aria-label="Move section up" title="Move section up">▲</button><button class="x" data-a="downSec" aria-label="Move section down" title="Move section down">▼</button></div></td>
         <td class="c-x"><button class="x" data-a="delSec" aria-label="Remove section" title="Remove section">✕</button></td></tr>
       ${items}
@@ -1392,7 +1400,7 @@ function renderAlerts() {
 }
 
 /* ---------- dirty / toast / modal ---------- */
-function markDirty() { dirty = true; setDirtyUI(); }
+function markDirty() { dirty = true; setDirtyUI(); histChanged(); }
 function setDirtyUI() { queueMicrotask(() => presenceTick()); $("eDirty").hidden = !dirty; $("btnSave").disabled = !canWrite || busy; $("btnSave").textContent = busy ? "Saving…" : "Save"; }
 let toastTimer;
 function toast(msg, undo) { $("toastMsg").textContent = msg; $("toastUndo").hidden = !undo; $("toast").hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $("toast").hidden = true, undo ? 7000 : 3500); }
@@ -1461,7 +1469,8 @@ $("sheet").addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if (!b) return;
   if (b.dataset.a === "unitMenu") { if (!$("umenu").hidden && uTarget === b.closest(".uwrap").querySelector("input")) closeUnitMenu(); else openUnitMenu(b); return; }
   const a = b.dataset.a, row = b.closest("[data-s]"), si = row ? +row.dataset.s : -1, ii = row?.dataset.i !== undefined ? +row.dataset.i : -1;
-  const S = cur.sections, keep = () => { undoState = clone(cur); };
+  const S = cur.sections, keep = () => {};
+  histCut();
   const mv = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return false; [arr[i], arr[j]] = [arr[j], arr[i]]; return true; };
   let focusSel = null;
   switch (a) {
@@ -1470,6 +1479,8 @@ $("sheet").addEventListener("click", e => {
     case "upItem": if (!mv(S[si].items, ii, -1)) return; break;
     case "downItem": if (!mv(S[si].items, ii, 1)) return; break;
     case "addSec": S.push({title:"", note:"", items:[{desc:"",qty:1,unit:"LSM",rate:0}]}); focusSel = `tbody[data-s="${S.length-1}"] tr.sec input`; break;
+    case "dupSec": { const c = clone(S[si]); S.splice(si + 1, 0, c); flashSec = si + 1; const n = c.items.filter(it => (it.desc || "").trim()).length;
+      toast(`Section ${letter(si)} duplicated as ${letter(si + 1)}${n ? ` with ${n} item${n > 1 ? "s" : ""}` : ""}`, true); break; }
     case "delSec": keep(); S.splice(si,1); if (!S.length) S.push({title:"",note:"",items:[{desc:"",qty:1,unit:"LSM",rate:0}]}); toast("Section removed", true); break;
     case "upSec": if (!mv(S, si, -1)) return; break;
     case "downSec": if (!mv(S, si, 1)) return; break;
@@ -1480,10 +1491,45 @@ $("sheet").addEventListener("click", e => {
     case "resetTerms": keep(); cur.terms = clone(defaults.terms); toast("Default terms restored", true); break;
     default: return;
   }
-  markDirty(); renderEditor();
+  markDirty(); histSettle(); renderEditor();
+  if (flashSec >= 0) { const t = document.querySelector(`#sheet tbody[data-s="${flashSec}"]`); flashSec = -1; t?.scrollIntoView({behavior: "smooth", block: "center"}); }
   if (focusSel) document.querySelector(focusSel)?.focus();
 });
-$("toastUndo").onclick = () => { if (undoState) { cur = undoState; undoState = null; renderEditor(); markDirty(); } $("toast").hidden = true; };
+$("toastUndo").onclick = () => { $("toast").hidden = true; if (!$("vEdit").hidden) histUndo(); };
+
+/* ---------- undo / redo (changes since the quotation was opened or last saved) ---------- */
+let hist = [], fut = [], histBase = null, histBurst = false, histT = null, flashSec = -1;
+function histSnap() { const c = clone(cur); delete c.contract; delete c.certificate; delete c.handover; return JSON.stringify(c); }
+function histUI() { $("btnUndo").disabled = !hist.length && !histBurst; $("btnRedo").disabled = !fut.length; }
+function histReset() { hist = []; fut = []; clearTimeout(histT); histBurst = false; histBase = cur ? histSnap() : null; histUI(); }
+function histSettle() { clearTimeout(histT); histBurst = false; if (cur) histBase = histSnap(); histUI(); }
+function histCut() { if (histBurst && cur) { clearTimeout(histT); histBurst = false; histBase = histSnap(); } }
+/* called right after anything changes; typing in one go counts as one step */
+function histChanged() {
+  if (!cur || histBase == null) return;
+  if (!histBurst) { hist.push(histBase); if (hist.length > 50) hist.shift(); fut = []; histBurst = true; }
+  clearTimeout(histT); histT = setTimeout(histSettle, 900); histUI();
+}
+function histApply(snapStr) {
+  const keepP = {contract: cur.contract, certificate: cur.certificate, handover: cur.handover};
+  cur = Object.assign(hydrate(JSON.parse(snapStr)), keepP); histBase = snapStr;
+  dirty = true; setDirtyUI(); renderEditor(); checkDupes();
+}
+function histUndo() {
+  if (!cur || $("vEdit").hidden) return; if (histBurst) histSettle();
+  if (!hist.length) return; fut.push(histSnap()); histApply(hist.pop()); histUI(); toast("Undone");
+}
+function histRedo() {
+  if (!cur || $("vEdit").hidden || !fut.length) return; if (histBurst) histSettle();
+  hist.push(histSnap()); histApply(fut.pop()); histUI(); toast("Redone");
+}
+$("btnUndo").onclick = histUndo; $("btnRedo").onclick = histRedo;
+document.addEventListener("keydown", e => {
+  if (!(e.ctrlKey || e.metaKey) || $("vEdit").hidden || !$("scrim").hidden || !$("pv").hidden) return;
+  const k = e.key.toLowerCase();
+  if (k === "z" && !e.shiftKey) { if (!hist.length && !histBurst) return; e.preventDefault(); histUndo(); }
+  else if (k === "y" || (k === "z" && e.shiftKey)) { if (!fut.length) return; e.preventDefault(); histRedo(); }
+});
 $("alerts").addEventListener("click", async e => {
   const o = e.target.closest("[data-open]"); if (o) { await openQuote(o.dataset.open); return; }
   if (e.target.closest("[data-a=reload]")) { remoteChanged = false; await openQuote(curId, true); }
@@ -1507,7 +1553,7 @@ function watchCurrent() {
   stopQuote = store.watchQuote(id, live => {
     if (id !== curId || !live || !cur) return;
     if ((live.updatedAt || null) !== (baseUpdatedAt || null) && live.writeTab !== tabId) {
-      if (!dirty) { const keep = {contract: cur.contract, certificate: cur.certificate, handover: cur.handover}; cur = Object.assign(hydrate(live), keep); baseUpdatedAt = live.updatedAt || null; savedStatus = cur.status; savedRev = cur.rev; renderEditor(); toast(`${label(live)} was updated by ${live.updatedBy ? nameFor(live.updatedBy, live.updatedByName) : "someone else"}`); }
+      if (!dirty) { const keep = {contract: cur.contract, certificate: cur.certificate, handover: cur.handover}; cur = Object.assign(hydrate(live), keep); baseUpdatedAt = live.updatedAt || null; savedStatus = cur.status; savedRev = cur.rev; renderEditor(); histReset(); toast(`${label(live)} was updated by ${live.updatedBy ? nameFor(live.updatedBy, live.updatedByName) : "someone else"}`); }
       else { remoteChanged = true; renderAlerts(); }
     }
   }, () => {});
@@ -1515,7 +1561,7 @@ function watchCurrent() {
 function loadIntoEditor(d, id) {
   cur = hydrate(d); delete cur.contract; delete cur.certificate; delete cur.handover; curId = id; dirty = false; baseUpdatedAt = d.updatedAt || null; savedStatus = cur.status; savedRev = cur.rev ?? 0;
   ackProject = false; remoteChanged = false; dupState = {client: [], project: []};
-  renderEditor(); show("edit"); watchCurrent(); checkDupes();
+  renderEditor(); histReset(); show("edit"); watchCurrent(); checkDupes();
   if (isDocAdmin && (index.get(id)?.hasContract || index.get(id)?.hasCert || index.get(id)?.hasHandover)) store.getPrivate(id).then(x => {
     if (curId !== id || !x) return; cur.contract = x.contract || null; cur.certificate = x.certificate || null; cur.handover = x.handover || null; renderEditor(); }).catch(() => {});
 }
@@ -1529,7 +1575,7 @@ $("btnNew").onclick = async () => {
   if (stopQuote) { stopQuote(); stopQuote = null; }
   cur = blankQuote(); cur.preparedBy = who; curId = null; dirty = false; baseUpdatedAt = null; savedStatus = null; savedRev = 0;
   ackProject = false; remoteChanged = false; dupState = {client: [], project: []}; nextNo = ""; nextCust = "";
-  renderEditor(); show("edit"); $("cName").focus(); refreshNext();
+  renderEditor(); histReset(); show("edit"); $("cName").focus(); refreshNext();
 };
 setInterval(() => { if (!curId && cur && !$("vEdit").hidden && !document.hidden) refreshNext(); }, 15000);
 $("btnBack").onclick = async () => { if (await leaveOk()) { if (stopQuote) { stopQuote(); stopQuote = null; } dirty = false; cur = null; curId = null; renderList(); show("list"); } };
@@ -1610,7 +1656,7 @@ async function save(opts = {}) {
     const keepP = {contract: cur.contract, certificate: cur.certificate, handover: cur.handover};
     cur = Object.assign(hydrate(full), keepP); baseUpdatedAt = now; dirty = false; remoteChanged = false; busy = false;
     savedStatus = cur.status; savedRev = cur.rev ?? 0;
-    renderEditor(); watchCurrent(); toast(`Saved ${label(full)}`);
+    renderEditor(); histReset(); watchCurrent(); toast(`Saved ${label(full)}`);
     afterSave(full, wasStatus, wasRev);
     return true;
   } catch (err) {
@@ -1641,7 +1687,7 @@ $("btnDup").onclick = async () => {
   delete c.contract; delete c.certificate; delete c.handover;
   c.client = {name:"",phone:"",email:"",trn:""}; c.project = {name:"",location:c.project.location,street:"",villa:"",phone:""};
   nextNo = ""; nextCust = ""; cur = c; curId = null; dirty = true; baseUpdatedAt = null; savedStatus = null; savedRev = 0; ackProject = false; remoteChanged = false; dupState = {client:[], project:[]};
-  renderEditor(); window.scrollTo(0,0); $("cName").focus();
+  renderEditor(); histReset(); window.scrollTo(0,0); $("cName").focus();
   toast("Copied as a new quotation. Enter the client and project, then save.");
   refreshNext();
 };
