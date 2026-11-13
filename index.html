@@ -223,12 +223,39 @@ table.pay .a{width:118px;text-align:right;padding:6px 8px;background:var(--s-row
 .paysum{font:300 12px/1.3 var(--f-head);padding:6px 0;color:var(--s-muted)}
 .paysum.badsum{color:#B42318;font-weight:500}
 .blk{margin-top:18px}
+.rich.ed{display:block;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.4;min-height:2.2em;cursor:text}
+.rich.ed:empty::before{content:attr(data-ph);color:var(--s-muted);opacity:.75;pointer-events:none}
+.rich b,.rich strong{font-weight:700}
+.blk > .rich.ed,.terms .rich.ed{font-weight:300}
+.blk > .rich.ed b,.terms .rich.ed b,.blk > .rich.ed strong,.terms .rich.ed strong{font-weight:500}
+table.items .rich.ed{margin:0;padding:7px 7px;border-radius:0}
+.fmtbar{position:absolute;z-index:30;display:flex;gap:2px;background:#152120;border-radius:8px;padding:4px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.fmtbar button{width:32px;height:30px;border:0;border-radius:6px;background:transparent;color:#fff;cursor:pointer;font:15px Georgia,"Times New Roman",serif;padding:0}
+.fmtbar button:hover,.fmtbar button.on{background:rgba(255,255,255,.18)}
+.fmtbar .fb{font-weight:700}.fmtbar .fi{font-style:italic}
+.fmtbar .fx{font:12px Arial,sans-serif;width:auto;padding:0 9px}
+td.c-sn{position:relative}
+td.c-sn .pick{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;width:15px;height:15px;opacity:0;cursor:pointer;accent-color:#10373B}
+tr.it:hover td.c-sn .pick,tr.it.picked td.c-sn .pick,.picking td.c-sn .pick,td.c-sn .pick:focus-visible{opacity:1}
+tr.it:hover td.c-sn .sn,tr.it.picked td.c-sn .sn,.picking td.c-sn .sn{visibility:hidden}
+tr.it.picked td{background:#E6F2EF}
+tr.it.flash td,tbody.flash td{animation:secflash 1.8s ease}
+.selbar{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:25;background:#1F2826;color:#fff;border-radius:10px;padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14px;max-width:calc(100% - 24px);flex-wrap:wrap}
+.selbar button{background:#86CDBF;color:#07211D;border:0;font:600 13px var(--f-body,Arial);padding:7px 11px;border-radius:6px;cursor:pointer}
+.selbar button.g{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+.clipbar{background:var(--info-bg,#E6F2EF);color:var(--info-fg,#10373B);border-bottom:1px solid var(--line)}
+.clipbar .wrap{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-block:7px;font-size:13.5px}
+.clipbar .sp{flex:1}
+.add-btn.paste{border-style:solid;border-color:#E3A008;background:#FFF8E5;color:#7A4A00}
+.add-btn.paste:hover{background:#FFEFC7}
+.sec-t .x.cp{width:34px;min-height:30px;flex:none;font-size:14px;border-radius:4px}
 .blk > textarea.ed{min-height:52px;padding:7px 8px;margin:0;font:300 12.5px/1.5 var(--f-head);border:1px solid var(--s-line);border-top:0;border-radius:0}
 .terms{list-style:none;margin:0;padding:0;counter-reset:t;border:1px solid var(--s-line);border-top:0}
 .terms li{display:grid;grid-template-columns:28px 1fr 26px;align-items:start;border-top:1px solid #E7ECEB}
 .terms li:first-child{border-top:0}
 .terms li::before{counter-increment:t;content:counter(t) ".";font:300 12px/1 var(--f-head);text-align:right;padding:8px 2px 0 0}
 .terms .ed{margin:0;padding:6px 6px;font:300 12.5px/1.45 var(--f-head)}
+.blk > .rich.ed{min-height:52px;padding:7px 8px;margin:0;font:300 12.5px/1.5 var(--f-head);border:1px solid var(--s-line);border-top:0;border-radius:0}
 .blkfoot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-top:8px}
 .signs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:60px;margin-top:46px}
 .signs .s{border-top:1px solid var(--s-ink);padding-top:6px;display:grid;gap:2px}
@@ -398,6 +425,7 @@ table.ctab{min-width:560px}
   <button class="btn ghost sm" id="btnSettings" hidden>Settings</button>
   <button class="btn ghost sm" id="btnSignOut" hidden>Sign out</button>
 </div></header>
+<div class="clipbar" id="clipbar" hidden><div class="wrap"><span>📋 <b id="clipTxt"></b> <span id="clipHint"></span></span><span class="sp"></span><button class="btn sm" id="clipOpen">Open another quotation</button><button class="btn sm" id="clipClear">Clear</button></div></div>
 <div class="demo" id="demoBanner" hidden>Demo mode: nothing here is saved to the real register. Remove <b>?demo</b> from the address to use the live site.</div>
 
 <main>
@@ -749,6 +777,8 @@ table.ctab{min-width:560px}
   <div class="pv-pages" id="pvPages"></div>
 </div>
 <div class="scrim" id="scrim" hidden><div class="modal" role="dialog" aria-modal="true"><h3 id="mT"></h3><p id="mB"></p><div class="row" id="mR"></div></div></div>
+<div class="fmtbar" id="fmtbar" hidden role="toolbar" aria-label="Text formatting"><button class="fb" data-c="bold" title="Bold (Ctrl+B)" aria-label="Bold">B</button><button class="fi" data-c="italic" title="Italic (Ctrl+I)" aria-label="Italic">I</button><button class="fx" data-c="removeFormat" title="Remove bold and italic">Clear</button></div>
+<div class="selbar" id="selbar" hidden><span id="selTxt"></span><button id="selCopy">Copy</button><button class="g" id="selNone">Cancel</button></div>
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastUndo" hidden>Undo</button></div>
 <div class="umenu" id="umenu" hidden role="dialog" aria-label="Choose a unit"></div>
 <datalist id="peopleList"></datalist>
@@ -1070,7 +1100,7 @@ function demoStore() {
 }
 
 /* ---------- register ---------- */
-function show(view) { view = {list: "vList", edit: "vEdit"}[view] || view; ["vAuth","vList","vEdit","vSet","vCon","vCert","vHand","vRen"].forEach(v => $(v).hidden = v !== view); queueMicrotask(() => presenceTick()); window.scrollTo(0,0); if (view === "vEdit") requestAnimationFrame(sizeAll); }
+function show(view) { view = {list: "vList", edit: "vEdit"}[view] || view; ["vAuth","vList","vEdit","vSet","vCon","vCert","vHand","vRen"].forEach(v => $(v).hidden = v !== view); queueMicrotask(() => { presenceTick(); updClip(); updPick(); $("fmtbar").hidden = true; }); window.scrollTo(0,0); if (view === "vEdit") requestAnimationFrame(sizeAll); }
 function startIndex() {
   if (stopIndex) stopIndex();
   stopIndex = store.watchIndex(indexLimit, rows => {
@@ -1243,9 +1273,9 @@ function renderEditor() {
   $("btnContract").hidden = !isDocAdmin || !curId || del || st !== "Approved"; $("btnContract").textContent = q.contract ? "Contract" : "Create contract";
   $("defaultsBar").hidden = !isAdmin;
   const secRows = q.sections.map((s, si) => {
-    const items = s.items.map((it, ii) => `<tr class="it" data-s="${si}" data-i="${ii}" id="row-${si}-${ii}">
-      <td class="c-sn">${ii+1}</td>
-      <td><textarea class="ed" rows="1" data-f="desc" aria-label="Description" placeholder="Describe the work, material and finish">${esc(it.desc)}</textarea></td>
+    const items = s.items.map((it, ii) => `<tr class="it${picked.has(si + ":" + ii) ? " picked" : ""}${flashRows && flashRows.si === si && ii >= flashRows.from ? " flash" : ""}" data-s="${si}" data-i="${ii}" id="row-${si}-${ii}">
+      <td class="c-sn"><input type="checkbox" class="pick" data-pick="${si}:${ii}" ${picked.has(si + ":" + ii) ? "checked" : ""} aria-label="Select item ${letter(si)}${ii+1} to copy"><span class="sn">${ii+1}</span></td>
+      <td>${richEd("desc", "data-f=\"desc\"", it.desc, "Describe the work, material and finish", "Description")}</td>
       <td class="c-q"><input class="ed n" data-f="qty" inputmode="decimal" value="${esc(it.qty)}" aria-label="Quantity"></td>
       <td class="c-u"><div class="uwrap"><input class="ed" data-f="unit" value="${esc(it.unit)}" placeholder="unit" aria-label="Unit (type any unit)"><button class="ubtn" data-a="unitMenu" aria-label="Choose a unit" title="Choose a unit">▾</button></div></td>
       <td class="c-r"><input class="ed n" data-f="rate" inputmode="decimal" value="${esc(it.rate)}" aria-label="Unit price"></td>
@@ -1253,13 +1283,13 @@ function renderEditor() {
       <td class="c-x"><div class="mv"><button class="x" data-a="upItem" aria-label="Move item up" title="Move up">▲</button><button class="x" data-a="downItem" aria-label="Move item down" title="Move down">▼</button></div></td>
       <td class="c-x"><button class="x" data-a="delItem" aria-label="Remove item" title="Remove item">✕</button></td></tr>`).join("");
     return `<tbody data-s="${si}"${si === flashSec ? ' class="flash"' : ""}>
-      <tr class="sec" data-s="${si}"><td class="c-sn">${letter(si)}</td><td colspan="5"><div class="sec-t"><input class="ed" data-f="title" value="${esc(s.title)}" placeholder="Section title, e.g. Demolition works" aria-label="Section title"><button class="x dup" data-a="dupSec" aria-label="Duplicate section" title="Duplicate section (copies all its items)">⧉</button></div></td>
+      <tr class="sec" data-s="${si}"><td class="c-sn">${letter(si)}</td><td colspan="5"><div class="sec-t"><input class="ed" data-f="title" value="${esc(s.title)}" placeholder="Section title, e.g. Demolition works" aria-label="Section title"><button class="x cp" data-a="copySec" aria-label="Copy section to use in another quotation" title="Copy this whole section to paste into another quotation">📋</button><button class="x dup" data-a="dupSec" aria-label="Duplicate section" title="Duplicate section (copies all its items)">⧉</button></div></td>
         <td class="c-x"><div class="mv"><button class="x" data-a="upSec" aria-label="Move section up" title="Move section up">▲</button><button class="x" data-a="downSec" aria-label="Move section down" title="Move section down">▼</button></div></td>
         <td class="c-x"><button class="x" data-a="delSec" aria-label="Remove section" title="Remove section">✕</button></td></tr>
       ${items}
       <tr class="note" data-s="${si}"><td></td><td colspan="5"><input class="ed" data-f="note" value="${esc(s.note)}" placeholder="+ Section note (optional, prints in bold under the items)" aria-label="Section note"></td><td colspan="2"></td></tr>
       <tr class="subt"><td colspan="5" id="subl-${si}">Sub total</td><td class="amt tn" id="sub-${si}"></td><td colspan="2"></td></tr>
-      <tr class="add" data-s="${si}"><td></td><td colspan="7"><button class="add-btn" data-a="addItem">+ Add item to ${letter(si)}</button></td></tr>
+      <tr class="add" data-s="${si}"><td></td><td colspan="7"><button class="add-btn" data-a="addItem">+ Add item to ${letter(si)}</button>${clip?.items?.length ? ` <button class="add-btn paste" data-a="pasteInto">📋 Paste ${clip.items.length} item${clip.items.length > 1 ? "s" : ""} into ${letter(si)}</button>` : ""}</td></tr>
     </tbody>`;
   }).join("");
 
@@ -1301,7 +1331,7 @@ function renderEditor() {
     <thead><tr><th class="c-sn">S/N</th><th>DESCRIPTION</th><th class="c-q">QNTY</th><th class="c-u">UNITS</th><th class="c-r">UNIT PRICE (AED)</th><th class="c-t">TOTAL (AED)</th><th class="c-x" colspan="2"></th></tr></thead>
     ${secRows}
   </table></div>
-  <button class="add-btn" data-a="addSec">+ Add section</button>
+  <button class="add-btn" data-a="addSec">+ Add section</button>${clip?.items?.length ? ` <button class="add-btn paste" data-a="pasteNew">📋 Paste as new section${clip.title ? ` “${esc(clip.title)}”` : ""}</button>` : ""}
 
   <div class="lower">
     <div>
@@ -1320,10 +1350,10 @@ function renderEditor() {
   </div>
 
   <div class="blk"><div class="bar">${inp("labels.notes", L.notes, "Notes heading")}</div>
-    <textarea class="ed" rows="2" data-g="notes" placeholder="Optional. Inclusions, exclusions, timeline, anything specific to this job. Leave empty to hide it from the printout." aria-label="Notes">${esc(q.notes)}</textarea></div>
+    ${richEd("notes", "data-g=\"notes\"", q.notes, "Optional. Inclusions, exclusions, timeline, anything specific to this job. Leave empty to hide it from the printout.", "Notes")}</div>
 
   <div class="blk"><div class="bar">${inp("labels.terms", L.terms, "Terms heading")}</div>
-    <ol class="terms">${q.terms.map((t,ti) => `<li data-t="${ti}"><textarea class="ed" rows="1" data-tf aria-label="Term ${ti+1}">${esc(t)}</textarea><button class="x" data-a="delTerm" aria-label="Remove term ${ti+1}">✕</button></li>`).join("")}</ol>
+    <ol class="terms">${q.terms.map((t,ti) => `<li data-t="${ti}">${richEd("term", "data-tf", t, "", "Term " + (ti+1))}<button class="x" data-a="delTerm" aria-label="Remove term ${ti+1}">✕</button></li>`).join("")}</ol>
     <div class="blkfoot"><button class="add-btn" data-a="addTerm">+ Add term</button><button class="add-btn" data-a="resetTerms">Reset to default terms</button></div>
   </div>
 
@@ -1417,7 +1447,8 @@ function ask(title, body, buttons) {
 /* ---------- editor events ---------- */
 function setPath(obj, path, v) { const p = path.split("."); let o = obj; while (p.length > 1) { o[p[0]] = o[p[0]] || {}; o = o[p.shift()]; } o[p[0]] = v; }
 function onField(e) {
-  const t = e.target;
+  const t = e.target.closest?.(".rich") || e.target;
+  if (t.classList?.contains("rich")) Object.defineProperty(t, "value", {configurable: true, get: () => richToMark(t)});
   if (t.tagName === "TEXTAREA") autosize(t);
   if (t.dataset.g) {
     const g = t.dataset.g;
@@ -1474,11 +1505,18 @@ $("sheet").addEventListener("click", e => {
   const mv = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return false; [arr[i], arr[j]] = [arr[j], arr[i]]; return true; };
   let focusSel = null;
   switch (a) {
-    case "addItem": S[si].items.push({desc:"",qty:1,unit:S[si].items.at(-1)?.unit || "LSM",rate:0}); focusSel = `#row-${si}-${S[si].items.length-1} textarea`; break;
+    case "addItem": S[si].items.push({desc:"",qty:1,unit:S[si].items.at(-1)?.unit || "LSM",rate:0}); focusSel = `#row-${si}-${S[si].items.length-1} .rich`; break;
     case "delItem": keep(); S[si].items.splice(ii,1); if (!S[si].items.length) S[si].items.push({desc:"",qty:1,unit:"LSM",rate:0}); toast("Item removed", true); break;
     case "upItem": if (!mv(S[si].items, ii, -1)) return; break;
     case "downItem": if (!mv(S[si].items, ii, 1)) return; break;
     case "addSec": S.push({title:"", note:"", items:[{desc:"",qty:1,unit:"LSM",rate:0}]}); focusSel = `tbody[data-s="${S.length-1}"] tr.sec input`; break;
+    case "copySec": { setClip({title: S[si].title || "", items: clone(S[si].items).filter(it => (it.desc || "").trim() || num(it.rate)), from: cur.number ? label(cur) : "this quotation"}); if (!clip.items.length) clip.items = clone(S[si].items);
+      toast(`Section ${letter(si)} copied (${clip.items.length} item${clip.items.length > 1 ? "s" : ""}). Open another quotation and press Paste.`); renderEditor(); return; }
+    case "pasteInto": { if (!clip?.items?.length) return; const from = S[si].items.length, blank = from === 1 && !(S[si].items[0].desc || "").trim() && !num(S[si].items[0].rate);
+      if (blank) S[si].items = []; S[si].items.push(...clone(clip.items)); flashRows = {si, from: blank ? 0 : from};
+      toast(`Pasted ${clip.items.length} item${clip.items.length > 1 ? "s" : ""} into section ${letter(si)}`, true); break; }
+    case "pasteNew": { if (!clip?.items?.length) return; S.push({title: clip.title || "", note: "", items: clone(clip.items)}); flashSec = S.length - 1;
+      toast(`Pasted as new section ${letter(S.length - 1)}`, true); break; }
     case "dupSec": { const c = clone(S[si]); S.splice(si + 1, 0, c); flashSec = si + 1; const n = c.items.filter(it => (it.desc || "").trim()).length;
       toast(`Section ${letter(si)} duplicated as ${letter(si + 1)}${n ? ` with ${n} item${n > 1 ? "s" : ""}` : ""}`, true); break; }
     case "delSec": keep(); S.splice(si,1); if (!S.length) S.push({title:"",note:"",items:[{desc:"",qty:1,unit:"LSM",rate:0}]}); toast("Section removed", true); break;
@@ -1486,16 +1524,132 @@ $("sheet").addEventListener("click", e => {
     case "downSec": if (!mv(S, si, 1)) return; break;
     case "addPay": cur.payment.push({pct:0,label:""}); focusSel = `tr[data-p="${cur.payment.length-1}"] .l input`; break;
     case "delPay": keep(); cur.payment.splice(+b.closest("[data-p]").dataset.p,1); toast("Milestone removed", true); break;
-    case "addTerm": cur.terms.push(""); focusSel = `.terms li:last-child textarea`; break;
+    case "addTerm": cur.terms.push(""); focusSel = `.terms li:last-child .rich`; break;
     case "delTerm": keep(); cur.terms.splice(+b.closest("[data-t]").dataset.t,1); toast("Term removed", true); break;
     case "resetTerms": keep(); cur.terms = clone(defaults.terms); toast("Default terms restored", true); break;
     default: return;
   }
-  markDirty(); histSettle(); renderEditor();
+  if (!["pasteInto"].includes(a)) picked.clear();
+  markDirty(); histSettle(); renderEditor(); flashRows = null;
   if (flashSec >= 0) { const t = document.querySelector(`#sheet tbody[data-s="${flashSec}"]`); flashSec = -1; t?.scrollIntoView({behavior: "smooth", block: "center"}); }
   if (focusSel) document.querySelector(focusSel)?.focus();
 });
 $("toastUndo").onclick = () => { $("toast").hidden = true; if (!$("vEdit").hidden) histUndo(); };
+
+
+/* ---------- bold / italic in descriptions, notes and terms ----------
+   stored as plain text with **bold** and __italic__ markers, so old quotes and the PDF keep working */
+const RICH_PH = {};
+function markToHtml(m) {
+  let b = false, i = false, out = "";
+  String(m || "").split(/(\*\*|__|\n)/).forEach(p => {
+    if (p === "**") { out += b ? "</b>" : "<b>"; b = !b; }
+    else if (p === "__") { out += i ? "</i>" : "<i>"; i = !i; }
+    else if (p === "\n") out += "<br>";
+    else out += esc(p);
+  });
+  if (i) out += "</i>"; if (b) out += "</b>";
+  if (/<br>$/.test(out)) out += "<br>";
+  return out;
+}
+function richToMark(el) {
+  const runs = [];
+  const walk = (n, b, i) => {
+    if (n.nodeType === 3) { if (n.nodeValue) runs.push({t: n.nodeValue.replace(/ /g, " "), b, i}); return; }
+    if (n.nodeType !== 1) return;
+    const tag = n.tagName, st = n.style || {};
+    if (tag === "BR") { runs.push({t: "\n", b: false, i: false}); return; }
+    let nb = b || tag === "B" || tag === "STRONG" || /^(bold|[6-9]00)$/.test(st.fontWeight || "");
+    let ni = i || tag === "I" || tag === "EM" || st.fontStyle === "italic";
+    if (st.fontWeight && /^(normal|[1-4]00)$/.test(st.fontWeight)) nb = false;
+    if (st.fontStyle === "normal") ni = false;
+    const block = (tag === "DIV" || tag === "P") && n !== el;
+    if (block && runs.length && runs[runs.length - 1].t !== "\n") runs.push({t: "\n", b: false, i: false});
+    n.childNodes.forEach(c => walk(c, nb, ni));
+  };
+  el.childNodes.forEach(c => walk(c, false, false));
+  if (runs.length && runs[runs.length - 1].t === "\n") runs.pop();    /* the browser's trailing line-break placeholder */
+  let out = "", b = false, i = false;
+  for (const r of runs) {
+    const wb = r.t === "\n" ? false : r.b, wi = r.t === "\n" ? false : r.i;
+    if (r.t !== "\n" && !r.t.trim()) { out += r.t; continue; }     /* spaces don't open or close formatting */
+    if (i && !wi) { out += "__"; i = false; }
+    if (b && !wb) { if (i) { out += "__"; i = false; } out += "**"; b = false; }
+    if (!b && wb) { if (i) { out += "__"; i = false; } out += "**"; b = true; }
+    if (!i && wi) { out += "__"; i = true; }
+    out += r.t;
+  }
+  if (i) out += "__"; if (b) out += "**";
+  return out.replace(/\*\*\*\*|____/g, "");
+}
+const plainText = m => String(m || "").replace(/\*\*|__/g, "");
+function richEd(kind, attrs, val, ph, aria) {
+  return `<div class="ed rich" contenteditable="true" role="textbox" aria-multiline="true" ${attrs} data-ph="${esc(ph)}" aria-label="${esc(aria)}">${markToHtml(val)}</div>`;
+}
+/* paste as plain text, Enter = new line inside the same box */
+$("sheet").addEventListener("paste", e => {
+  const t = e.target.closest?.(".rich"); if (!t) return;
+  e.preventDefault(); const txt = (e.clipboardData || window.clipboardData).getData("text/plain").replace(/\r\n?/g, "\n");
+  document.execCommand("insertText", false, txt);
+});
+$("sheet").addEventListener("keydown", e => {
+  const t = e.target.closest?.(".rich"); if (!t) return;
+  if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); document.execCommand("insertLineBreak"); }
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && ["b", "i"].includes(e.key.toLowerCase())) { e.preventDefault(); document.execCommand(e.key.toLowerCase() === "b" ? "bold" : "italic"); placeFmt(); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "u") e.preventDefault();      /* underline isn't printed, so don't allow it */
+});
+$("sheet").addEventListener("drop", e => { if (e.target.closest?.(".rich")) e.preventDefault(); });
+function richHost() { const s = getSelection(); if (!s.rangeCount) return null; const n = s.anchorNode; const el = n && (n.nodeType === 1 ? n : n.parentElement); return el?.closest?.("#sheet .rich") || null; }
+function placeFmt() {
+  const s = getSelection(), f = $("fmtbar"), host = richHost();
+  if (!host || s.isCollapsed || $("vEdit").hidden) { f.hidden = true; return; }
+  const r = s.getRangeAt(0).getBoundingClientRect(); if (!r.width && !r.height) { f.hidden = true; return; }
+  f.hidden = false;
+  f.style.left = Math.max(8, Math.min(innerWidth - f.offsetWidth - 8, r.left + r.width / 2 - f.offsetWidth / 2)) + scrollX + "px";
+  const top = r.top - f.offsetHeight - 8; f.style.top = (top < 60 ? r.bottom + 8 : top) + scrollY + "px";
+  f.querySelector(".fb").classList.toggle("on", document.queryCommandState("bold"));
+  f.querySelector(".fi").classList.toggle("on", document.queryCommandState("italic"));
+}
+document.addEventListener("selectionchange", () => requestAnimationFrame(placeFmt));
+window.addEventListener("scroll", () => { if (!$("fmtbar").hidden) placeFmt(); }, {passive: true});
+$("fmtbar").addEventListener("mousedown", e => e.preventDefault());
+$("fmtbar").addEventListener("click", e => {
+  const c = e.target.closest("[data-c]")?.dataset.c; if (!c || !richHost()) return;
+  document.execCommand(c); placeFmt();
+});
+
+/* ---------- copy items or sections to another quotation ---------- */
+let clip = null, picked = new Set(), flashRows = null;
+try { clip = JSON.parse(localStorage.getItem("byld-clip") || "null"); } catch {}
+function setClip(c) { clip = c; try { c ? localStorage.setItem("byld-clip", JSON.stringify(c)) : localStorage.removeItem("byld-clip"); } catch {} updClip(); }
+function updClip() {
+  const bar = $("clipbar"), on = !!clip?.items?.length && (!$("vList").hidden || !$("vEdit").hidden);
+  bar.hidden = !on; if (!on) return;
+  const n = clip.items.length;
+  $("clipTxt").textContent = `Copied: ${clip.title ? `section “${clip.title}” with ` : ""}${n} item${n > 1 ? "s" : ""} from ${clip.from || "a quotation"}.`;
+  const inList = !$("vList").hidden, same = cur && clip.from && cur.number && label(cur) === clip.from;
+  $("clipHint").textContent = inList ? "Open the quotation you want to paste into." : same ? "Open another quotation to paste it there, or paste it here." : "Use the Paste buttons under the sections.";
+  $("clipOpen").hidden = inList;
+}
+window.addEventListener("storage", e => { if (e.key !== "byld-clip") return; try { clip = JSON.parse(e.newValue || "null"); } catch { clip = null; } updClip(); if (!$("vEdit").hidden && cur) renderEditor(); });
+$("clipClear").onclick = () => { setClip(null); if (!$("vEdit").hidden && cur) renderEditor(); };
+$("clipOpen").onclick = () => $("btnBack").click();
+function updPick() {
+  $("selbar").hidden = !picked.size || $("vEdit").hidden;
+  $("selTxt").textContent = `${picked.size} item${picked.size > 1 ? "s" : ""} selected`;
+  $("sheet").classList.toggle("picking", picked.size > 0);
+}
+$("sheet").addEventListener("change", e => {
+  const k = e.target.dataset?.pick; if (!k) return;
+  e.target.checked ? picked.add(k) : picked.delete(k); e.target.closest("tr").classList.toggle("picked", e.target.checked); updPick();
+});
+$("selNone").onclick = () => { picked.clear(); document.querySelectorAll("#sheet tr.it.picked").forEach(r => r.classList.remove("picked")); document.querySelectorAll("#sheet .pick").forEach(c => c.checked = false); updPick(); };
+$("selCopy").onclick = () => {
+  const items = [...picked].map(k => k.split(":").map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(([si, ii]) => cur.sections[si]?.items[ii]).filter(Boolean).map(clone);
+  if (!items.length) return;
+  setClip({title: "", items, from: cur.number ? label(cur) : "this quotation"});
+  $("selNone").click(); renderEditor(); toast(`${items.length} item${items.length > 1 ? "s" : ""} copied. Open another quotation and press Paste.`);
+};
 
 /* ---------- undo / redo (changes since the quotation was opened or last saved) ---------- */
 let hist = [], fut = [], histBase = null, histBurst = false, histT = null, flashSec = -1;
@@ -1561,7 +1715,7 @@ function watchCurrent() {
 function loadIntoEditor(d, id) {
   cur = hydrate(d); delete cur.contract; delete cur.certificate; delete cur.handover; curId = id; dirty = false; baseUpdatedAt = d.updatedAt || null; savedStatus = cur.status; savedRev = cur.rev ?? 0;
   ackProject = false; remoteChanged = false; dupState = {client: [], project: []};
-  renderEditor(); histReset(); show("edit"); watchCurrent(); checkDupes();
+  picked.clear(); renderEditor(); histReset(); show("edit"); watchCurrent(); checkDupes();
   if (isDocAdmin && (index.get(id)?.hasContract || index.get(id)?.hasCert || index.get(id)?.hasHandover)) store.getPrivate(id).then(x => {
     if (curId !== id || !x) return; cur.contract = x.contract || null; cur.certificate = x.certificate || null; cur.handover = x.handover || null; renderEditor(); }).catch(() => {});
 }
@@ -1575,7 +1729,7 @@ $("btnNew").onclick = async () => {
   if (stopQuote) { stopQuote(); stopQuote = null; }
   cur = blankQuote(); cur.preparedBy = who; curId = null; dirty = false; baseUpdatedAt = null; savedStatus = null; savedRev = 0;
   ackProject = false; remoteChanged = false; dupState = {client: [], project: []}; nextNo = ""; nextCust = "";
-  renderEditor(); histReset(); show("edit"); $("cName").focus(); refreshNext();
+  picked.clear(); renderEditor(); histReset(); show("edit"); $("cName").focus(); refreshNext();
 };
 setInterval(() => { if (!curId && cur && !$("vEdit").hidden && !document.hidden) refreshNext(); }, 15000);
 $("btnBack").onclick = async () => { if (await leaveOk()) { if (stopQuote) { stopQuote(); stopQuote = null; } dirty = false; cur = null; curId = null; renderList(); show("list"); } };
@@ -1817,11 +1971,11 @@ function buildPdf(q, opts = {}) {
     if (sy + need > H - BOT) { doc.addPage(); sy = M + 2; newPage = true; }
     const secRow = [{content:code, styles:{...headCG, fillColor:DARK, textColor:255, halign:"center", fontSize:8.4}}, {content:(s.title||"").toUpperCase(), colSpan:5, styles:{...headCG, fillColor:DARK, textColor:255, fontSize:8.4, halign:"left"}}];
     const body = s.items.map((it, ii) => { const zero = num(it.rate) === 0;
-      return [ii+1, it.desc, fmtQ(num(it.qty)), it.unit || "", zero ? "-" : fmt(num(it.rate)), {content: zero ? "Included" : fmt(T.secs[si].lines[ii]), styles:{fillColor:ROW, fontStyle: zero ? "italic" : "normal"}}]; });
+      return [ii+1, Object.assign(richCell(it.desc, "helvetica"), {width: CW - 94}), fmtQ(num(it.qty)), it.unit || "", zero ? "-" : fmt(num(it.rate)), {content: zero ? "Included" : fmt(T.secs[si].lines[ii]), styles:{fillColor:ROW, fontStyle: zero ? "italic" : "normal"}}]; });
     if (s.note) body.push([{content:"Note: " + s.note, colSpan:6, styles:{...headCG, fillColor:DARK, textColor:255, fontSize:8.4, halign:"left"}}]);
     const ss = {...headCG, fillColor:SAGE, textColor:255, fontSize:8.2};
     body.push([{content:`Subtotal – ${code}. ${s.title || ""}`, colSpan:5, styles:{...ss, halign:"left"}}, {content:"AED " + fmt(T.secs[si].sub), styles:{...ss, halign:"right"}}]);
-    doc.autoTable({startY:sy, margin:{left:M, right:M, bottom:BOT, top:M + 2}, theme:"grid", styles:base, columnStyles:colW, rowPageBreak:"avoid",
+    doc.autoTable({startY:sy, margin:{left:M, right:M, bottom:BOT, top:M + 2}, theme:"grid", styles:base, columnStyles:colW, rowPageBreak:"avoid", ...richHooks,
       showHead:"everyPage", head: (first || newPage) ? [colHead, secRow] : [secRow], body});
     first = false;
   });
@@ -1839,7 +1993,7 @@ function buildPdf(q, opts = {}) {
   if ((q.notes || "").trim()) {
     y = nextY(6, 16);
     doc.autoTable({startY:y, margin:{left:M, right:M, bottom:BOT, top:M + 2}, theme:"grid", styles:{...base, font:"CG", fontStyle:"light", fontSize:8, cellPadding:2},
-      headStyles:{...headCG, fillColor:SAGE, textColor:255, fontSize:8.2}, head:[[(L.notes||"NOTES").toUpperCase()]], body:[[q.notes.trim()]]});
+      headStyles:{...headCG, fillColor:SAGE, textColor:255, fontSize:8.2}, head:[[(L.notes||"NOTES").toUpperCase()]], body:[[Object.assign(richCell(q.notes.trim(), "CG"), {width: CW})]], ...richHooks});
   }
   /* payment */
   y = nextY(6, 10 + q.payment.length * 6);
@@ -1853,7 +2007,7 @@ function buildPdf(q, opts = {}) {
     doc.autoTable({startY:y, margin:{left:M, right:M, bottom:BOT, top:M + 2}, theme:"plain", rowPageBreak:"avoid",
       styles:{...base, font:"CG", fontStyle:"light", lineWidth:0, fontSize:8.2, cellPadding:{top:0.7,bottom:0.7,left:1,right:1}, valign:"top"},
       headStyles:{...headCG, fillColor:SAGE, textColor:255, fontSize:8.2, cellPadding:{top:1.5,bottom:1.5,left:1.6,right:1.6}}, head:[[{content:(L.terms||"TERMS & CONDITIONS").toUpperCase(), colSpan:2}]],
-      columnStyles:{0:{cellWidth:7, halign:"right"}}, body: q.terms.map((t,i) => [(i+1) + ".", t])});
+      columnStyles:{0:{cellWidth:7, halign:"right"}}, body: q.terms.map((t,i) => [(i+1) + ".", Object.assign(richCell(t, "CG"), {width: CW - 7})]), ...richHooks});
   }
   /* signatures */
   y = doc.lastAutoTable.finalY + 20; if (y + 14 > H - BOT) { doc.addPage(); y = M + 24; }
@@ -2138,6 +2292,73 @@ const contractFileName = q => `Contract ${label(q)} - ${q.client?.name || ""} - 
 /* BYLD house mark used in the letterhead footer (48 × 52 units) */
 
 /* rich text: **bold** spans, wrapped and justified */
+
+/* rich (bold / italic) text inside PDF table cells. fam: "helvetica" (items) or "CG" (notes, terms) */
+function richToks2(text) {
+  const out = []; let b = false, i = false;
+  String(text || "").split(/(\*\*|__|\n)/).forEach(part => {
+    if (part === "**") { b = !b; return; } if (part === "__") { i = !i; return; } if (part === "\n") { out.push({br: true}); return; }
+    part.split(/(\s+)/).forEach(w => { if (!w) return; if (/^\s+$/.test(w)) out.push({space: true}); else out.push({w, b, i}); });
+  });
+  return out;
+}
+function richSetFont(doc, fam, t) {
+  if (fam === "CG") doc.setFont("CG", t.b ? "medium" : "light");
+  else doc.setFont("helvetica", t.b && t.i ? "bolditalic" : t.b ? "bold" : t.i ? "italic" : "normal");
+}
+function richWrap(doc, text, width, size, fam) {
+  const lines = []; let line = [], lw = 0, pending = false;
+  doc.setFontSize(size); richSetFont(doc, fam, {}); const sp = doc.getTextWidth(" ");
+  const push = () => { lines.push({words: line, w: lw}); line = []; lw = 0; pending = false; };
+  for (const t of richToks2(text)) {
+    if (t.br) { push(); continue; }
+    if (t.space) { if (line.length) pending = true; continue; }
+    richSetFont(doc, fam, t); let w = doc.getTextWidth(t.w), word = t.w;
+    const gap = line.length && pending ? sp : 0;
+    if (line.length && lw + gap + w > width) push();
+    while (!line.length && w > width && word.length > 1) {            /* a single word longer than the cell: break it */
+      let k = word.length - 1; while (k > 1 && doc.getTextWidth(word.slice(0, k)) > width) k--;
+      line.push({...t, w: word.slice(0, k), width: doc.getTextWidth(word.slice(0, k)), gap: 0}); lw = line[0].width; push();
+      word = word.slice(k); w = doc.getTextWidth(word);
+    }
+    line.push({...t, w: word, width: w, gap: line.length && pending ? sp : 0}); lw += (line.length > 1 && pending ? sp : 0) + w; pending = false;
+  }
+  if (line.length || !lines.length) push();
+  return lines;
+}
+function richLine(doc, ln, x, y, size, fam) {
+  let cx = x;
+  ln.words.forEach(t => {
+    cx += t.gap; richSetFont(doc, fam, t); doc.setFontSize(size);
+    if (t.i && fam === "CG") {                          /* Cabinet Grotesk has no italic: slant the letters */
+      const k = doc.internal.scaleFactor, H = doc.internal.pageSize.getHeight(), y0 = (H - y) * k;
+      doc.internal.write("q 1 0 0.2 1 " + (-0.2 * y0).toFixed(3) + " 0 cm"); doc.text(t.w, cx, y); doc.internal.write("Q");
+    } else doc.text(t.w, cx, y);
+    cx += t.width;
+  });
+}
+/* hooks for doc.autoTable: cells whose raw is {rich: text, fam} get laid out and drawn here */
+function richCell(text, fam, styles = {}) { return {content: plainText(text), rich: String(text || ""), fam, styles}; }
+const richHooks = {
+  didParseCell(d) {
+    const r = d.cell.raw; if (!r || r.rich == null || d.section !== "body") return;
+    const st = d.cell.styles, pad = typeof st.cellPadding === "number" ? {left: st.cellPadding, right: st.cellPadding} : st.cellPadding;
+    const w = (d.column.raw?.richWidth || r.width) - (pad.left || 0) - (pad.right || 0);
+    const lines = richWrap(d.doc, r.rich, w, st.fontSize, r.fam);
+    d.cell.richLines = lines; d.cell.text = lines.map(l => l.words.map(x => x.w).join(" ") || " ");
+  },
+  willDrawCell(d) { if (d.cell.richLines) { d.cell.richText = d.cell.text; d.cell.text = []; } },
+  didDrawCell(d) {
+    const c = d.cell, lines = c.richLines; if (!lines || d.section !== "body") return;
+    const st = c.styles, pad = typeof st.cellPadding === "number" ? {top: st.cellPadding, left: st.cellPadding} : st.cellPadding;
+    const fs = st.fontSize, lh = fs * 1.15 / d.doc.internal.scaleFactor, textH = lines.length * lh;
+    let y = st.valign === "middle" ? c.y + (c.height - textH) / 2 : c.y + (pad.top || 0);
+    d.doc.setTextColor(...(Array.isArray(st.textColor) ? st.textColor : [st.textColor, st.textColor, st.textColor]));
+    lines.forEach((ln, li) => richLine(d.doc, ln, c.x + (pad.left || 0), y + li * lh + fs * 0.82 / d.doc.internal.scaleFactor, fs, c.raw.fam));
+    c.text = c.richText;
+  }
+};
+
 function richTokens(text) {
   const out = []; let bold = false;
   String(text).split(/(\*\*)/).forEach(part => { if (part === "**") { bold = !bold; return; }
@@ -2966,7 +3187,7 @@ function onUser(u) {
   try {
     if (!DEMO && !CFG.firebase?.apiKey) { authView("aStart", "This site isn't connected to Firebase yet: firebase-config.js is missing its settings."); authBusy(true); return; }
     store = DEMO ? demoStore() : await firebaseStore();
-    if (DEMO) window.__store = store;
+    if (DEMO) { window.__store = store; window.__dbg = {get cur() { return cur; }, get clip() { return clip; }, buildPdf, setClean() { dirty = false; }}; }
   } catch (err) { authView("aStart", "Couldn't load the sign-in service. Check your internet connection and reload."); authBusy(true); return; }
   if (DEMO) { await new Promise(r => { const s = document.createElement("script"); s.src = "demo-data.js"; s.onload = s.onerror = r; document.head.appendChild(s); });
     await store.importMany(window.DEMO_QUOTES || []); }
